@@ -38,7 +38,7 @@ export function Footer({ siteSettings }: FooterProps) {
   )
 
   return (
-    <footer className="border-t border-sandstein/30 bg-kalk pb-24 pt-16 md:pb-16">
+    <footer className="border-t border-sandstein/30 bg-kalk pb-24 pt-16 lg:pb-16">
       <Container>
         <div className="nora-grid gap-y-12">
           <div className="col-span-12 md:col-span-4">
