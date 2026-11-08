@@ -1,35 +1,43 @@
-import { headers as getHeaders } from 'next/headers.js'
-import { getPayload } from 'payload'
-import React from 'react'
+import Link from 'next/link'
 
-import config from '@/payload.config'
-import './styles.css'
+import { Container } from '@/components/layout/Container'
+import { HeroFacade } from '@/components/drawings'
+import { getPayloadClient } from '@/lib/payload'
 
-/**
- * Platzhalter — das eigentliche Frontend (Design, Zeichnungsmodul, Inhalte) entsteht in Phase 3/4.
- * Phase 2 liefert nur das Backend; diese Seite bestätigt, dass Next.js + Payload zusammenspielen.
- */
 export default async function HomePage() {
-  const headers = await getHeaders()
-  const payloadConfig = await config
-  const payload = await getPayload({ config: payloadConfig })
-  const { user } = await payload.auth({ headers })
+  const payload = await getPayloadClient()
+  const home = await payload.findGlobal({ slug: 'home' }).catch(() => null)
+
+  const heroLead =
+    home?.heroLead ??
+    'Seit 1979 bewirtschaften, vermieten und verkaufen wir Liegenschaften in Zürich – als kleines, unabhängiges Team in Privatbesitz.'
 
   return (
-    <div className="home flex min-h-screen flex-col items-center justify-center gap-6 p-12 text-center">
-      <h1 className="text-3xl font-semibold">Nora Immobilien AG — Konzept-Vorschau</h1>
-      <p className="max-w-prose text-sm opacity-80">
-        Phase 2 abgeschlossen: Next.js und Payload CMS sind verbunden und das Backend ist eingerichtet.
-        {user ? ` Angemeldet als ${user.email}.` : ' Das öffentliche Frontend folgt in Phase 3.'}
-      </p>
-      <a
-        className="rounded border border-current px-4 py-2 text-sm no-underline"
-        href={payloadConfig.routes.admin}
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        Zum Admin-Panel
-      </a>
-    </div>
+    <Container>
+      <section className="nora-grid items-center gap-y-10 py-10 md:py-16">
+        <div className="col-span-12 md:col-span-6 md:pr-8">
+          <h1 className="nora-h1">Wir betreuen Ihre Immobilie, als wäre es unsere eigene.</h1>
+          <p className="nora-lead mt-6">{heroLead}</p>
+          <div className="mt-8 flex flex-wrap gap-4">
+            <Link
+              href="/kontakt?anliegen=verwaltung"
+              className="nora-button-label bg-fensterladen px-6 py-3 text-weiss hover:opacity-90"
+            >
+              Verwaltung anfragen
+            </Link>
+            <Link
+              href="/objekte"
+              className="nora-button-label border border-tinte px-6 py-3 text-tinte hover:border-fensterladen hover:text-fensterladen"
+            >
+              Freie Objekte ansehen
+            </Link>
+          </div>
+        </div>
+
+        <div className="col-span-12 md:col-span-6">
+          <HeroFacade className="w-full text-tinte" />
+        </div>
+      </section>
+    </Container>
   )
 }

@@ -106,3 +106,45 @@ Blocker werden als Frage gestellt. Wird während des gesamten Projekts fortgefü
     einen eigenen Next-Dev-Server auf einem Nebenport (3211) statt den laufenden Entwicklungsserver zu
     nutzen, damit der Checkpoint-Beweis unabhängig und wiederholbar per `pnpm verify:access-control`
     läuft. Eine vollständige Vitest-Suite dafür folgt in Phase 8.
+
+## Phase 3 — Designsystem, Zeichnungsmodul, Layout
+
+21. **Hero-Fassade: Selbstzeichnen-Animation als Clip-Path-Wipe statt stroke-dasharray/
+    pathLength.** Erster Ansatz exakt nach Briefing-Wortlaut (`stroke-dashoffset`, `pathLength="1"`
+    auf jedem Fenster/Gesims/Dach-Element, eine gemeinsame Animation auf einem Vorfahren). Zwei
+    Probleme traten auf: (1) `pathLength` wird von Chromium nicht zuverlässig für die CSS-
+    Normalisierung von `stroke-dasharray`/`-dashoffset` herangezogen; (2) in Kombination mit
+    `vector-effect: non-scaling-stroke` (nötig, damit die Linien bei jeder Darstellungsgrösse exakt
+    1,25 px bleiben) wird das Dash-Muster im Bildschirm- statt im lokalen Koordinatenraum berechnet
+    — bei einer kleinteiligen Geometrie (Fenster ~1,2×2,0 "Meter"-Einheiten, stark hochskaliert auf
+    Bildschirmgrösse) entstand dadurch sichtbare Strichelung statt einer durchgezogenen Linie, auch
+    nach Abschluss der Animation. Eine zweite Variante mit selbst berechneten, exakten Pfadlängen
+    (Rechteck-Umfang, Liniendistanz etc. über eine `--path-len`-CSS-Variable) behob das `pathLength`-
+    Problem, nicht aber das Skalierungsproblem von `non-scaling-stroke`. Gelöst durch einen
+    Clip-Path-Wipe auf dem gesamten `<svg>` (`clip-path: inset(0 100% 0 0)` → `inset(0 0% 0 0)` über
+    1,6 s, `cubic-bezier(0.22, 1, 0.36, 1)`, `forwards`) — erzeugt denselben "zeichnet sich selbst"-
+    Eindruck, ist unabhängig von Darstellungsgrösse und Browser-Eigenheiten, und bleibt mit
+    `non-scaling-stroke` für konstante Linienstärke kompatibel. `prefers-reduced-motion` weiterhin
+    über die globale Regel abgedeckt (Animationsdauer faktisch 0).
+22. **Header-Breakpoint für die volle Desktop-Navigation auf `lg` (1024 px) angehoben**, nicht `md`
+    (768 px) wie im ersten Entwurf. Bei 768 px brachen die Navigationslabels ("Leistungen",
+    "Mieterservice", "Kontakt") durch `hyphens: auto` mitten im Wort um, weil nicht genug
+    Platz für Logo + sieben Navigationspunkte + Telefonnummer war — beim Screenshot-Selbstkritik-
+    Durchgang bei 768 px aufgefallen. Mobile Aktionsleiste unten entsprechend auch bis `lg` sichtbar,
+    damit Tablet-Breiten durchgängig das mobile Navigationsmuster (Hamburger-Menü + Aktionsleiste)
+    erhalten statt eines zu engen Zwischenzustands.
+23. **Startseite rendert nach `pnpm build` statisch (○), nicht dynamisch**, obwohl sie `siteSettings`
+    und `home` live über die Payload Local API lädt — Next erkennt keine Laufzeit-Abhängigkeit
+    (kein `searchParams`/`cookies`/`headers`-Zugriff) und backt den Payload-Abruf zur Build-Zeit ein.
+    Für Phase 3 unkritisch (noch keine echten Redaktions-Workflows), aber vor Phase 4/6 braucht die
+    Startseite eine bewusste Revalidierungs-Strategie (`revalidate`-Intervall oder
+    `revalidateTag`/`revalidatePath` aus den Payload-Hooks beim Speichern), sonst zeigt die gebaute
+    Seite veraltete Inhalte. Vorgemerkt für Phase 4.
+24. **Admin-Logo auf die SVG-Nachzeichnung umgestellt** (`src/components/admin/AdminLogo.tsx` nutzt
+    jetzt `Logo.tsx` statt der alten Rasterdatei) — wie in DECISIONS.md #16 für Phase 3 vorgesehen.
+    `Logo.tsx` setzt dafür Fallback-Hexwerte in den `var(--color-logo-rot, #e92624)`-Aufrufen, da das
+    Admin-Stylesheet die Frontend-Farb-Tokens nicht kennt.
+25. **Favicon-Set aus der SVG-Logo-Nachzeichnung erzeugt** (`favicon.ico` 16/32/48, `icon.svg`,
+    `apple-icon.png` 180×180 mit Kalk-Hintergrund, PWA-Icons 192/512 plus `manifest.json`) — über ein
+    einmaliges Build-Skript (Sharp für SVG→PNG, Pillow für die Mehrgrössen-ICO-Verpackung), nicht als
+    laufender `pnpm`-Task, da es sich nicht ändert, solange das Logo gleich bleibt.

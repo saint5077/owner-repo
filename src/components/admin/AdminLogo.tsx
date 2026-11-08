@@ -1,15 +1,11 @@
 import React from 'react'
 
-/**
- * Admin-Branding, Phase 2. Nutzt die bestehende 73×138-px-Rasterdatei (ausreichend für diese
- * kleine Darstellung) — wird in Phase 3 durch die SVG-Logo-Nachzeichnung ersetzt (DECISIONS.md).
- */
-export const AdminLogo: React.FC = () => (
-  // eslint-disable-next-line @next/next/no-img-element
-  <img alt="Nora Immobilien" src="/branding/logo.png" style={{ height: 42, width: 'auto' }} />
-)
+import { Logo } from '@/components/branding/Logo'
 
-export const AdminIcon: React.FC = () => (
-  // eslint-disable-next-line @next/next/no-img-element
-  <img alt="Nora Immobilien" src="/branding/logo.png" style={{ height: 24, width: 'auto' }} />
-)
+/**
+ * Admin-Branding. Nutzt ab Phase 3 die SVG-Logo-Nachzeichnung (siehe Logo.tsx, DESIGN.md §2)
+ * statt der alten 73×138-px-Rasterdatei — DECISIONS.md #16.
+ */
+export const AdminLogo: React.FC = () => <Logo style={{ height: 42, width: 'auto' }} />
+
+export const AdminIcon: React.FC = () => <Logo style={{ height: 24, width: 'auto' }} />
