@@ -56,3 +56,53 @@ Blocker werden als Frage gestellt. Wird während des gesamten Projekts fortgefü
 - Mietbewerbung mit sensiblen Dokumenten (Betreibungsauszug, Ausweis): **nicht** über die Website-
   Formulare hochladbar — nur Terminwunsch/Kontakt. Der eigentliche Bewerbungsprozess bleibt der
   bestehende Prozess des Kunden, bis dieser klärt, ob/wie er digitalisiert werden soll.
+
+## Phase 2 — Projekt-Setup & Payload-Backend
+
+12. **Lokale Entwicklung statt Neon/Vercel Blob.** Dieses Sandbox-Netzwerk erlaubt nur ausgehendes
+    HTTPS zu einer expliziten Allowlist (keine beliebige Postgres-TCP-Verbindung), und für Neon sowie
+    Vercel Blob liegen noch keine echten Kundenzugangsdaten vor. Entwicklung, Build und Tests laufen
+    deshalb gegen einen lokalen PostgreSQL-16-Server im Container (Rolle `nora`, DB `nora_dev`,
+    Zugangsdaten in `.env.local`, gitignored) und gegen Payloads lokalen Datei-Upload-Adapter
+    (`/media`, ebenfalls gitignored) statt gegen Vercel Blob. Produktion nutzt wie im Briefing
+    spezifiziert Neon (Frankfurt) und Vercel Blob (EU) — das Umschalten ist rein env-gesteuert, kein
+    Code-Unterschied. `.env.example` dokumentiert beide Fälle.
+13. **Pakete werden phasenweise installiert**, nicht alle auf einmal in Phase 2. Nur was Phase 2
+    tatsächlich braucht (Next.js/Payload-Kern, Postgres-Adapter, Lexical, Tailwind v4) ist installiert;
+    react-hook-form, zod, resend, react-email, Turnstile, Upstash, MapLibre, Embla, motion und
+    next-intl kommen in den Phasen, die sie verwenden (3/5/6/7).
+14. **`koordinaten` auf `properties` ist ein lat/lng-Zahlenpaar, kein Payload-`point`-Feld.** Der
+    `point`-Feldtyp erzeugt mit dem Postgres-Adapter eine PostGIS-`geometry`-Spalte; die lokale
+    Entwicklungsdatenbank hat die PostGIS-Erweiterung nicht installiert (und `apt-get install
+    postgresql-16-postgis-3` ist in diesem Sandbox-Paketspiegel nicht verfügbar). Ein einfaches
+    lat/lng-Zahlenpaar braucht keine Postgres-Erweiterung, funktioniert identisch auf Neon und reicht
+    für die swisstopo-Geokodierung (Phase 5) und eine spätere Kartendarstellung völlig aus.
+15. **Das Status-Feld auf `properties` heisst `objektstatus`, nicht `status`.** Payload erzeugt für
+    das interne Draft/Publish-Feld (`_status`, durch `versions.drafts` aktiviert) einen Postgres-Enum
+    mit demselben generierten Namen wie ein eigenes Feld namens `status` auf derselben Collection
+    (`enum_properties_status`) — das kollidierte beim Schema-Push. Umbenennung behebt es sauber, ohne
+    Versionierung/Live-Preview zu verlieren.
+16. **Admin-Logo nutzt vorerst die alte 73×138-px-Rasterdatei** (`reference/assets/logo.png`) über
+    eigene `graphics.Logo`/`graphics.Icon`-Admin-Components — ausreichend für die kleine Darstellung in
+    der Admin-Sidebar. Wird in Phase 3 durch die SVG-Logo-Nachzeichnung ersetzt (siehe `DESIGN.md` §2),
+    sobald diese existiert.
+17. **GraphQL ist vollständig deaktiviert** (`graphQL: { disable: true }`), die generierten
+    `/api/graphql`- und `/api/graphql-playground`-Routen wurden aus dem Scaffold entfernt (ungenutzt,
+    Briefing §8 verlangt die Deaktivierung explizit).
+18. **ESLint-Konfiguration ohne `@eslint/eslintrc`/`FlatCompat`.** Die vom Scaffold mitgelieferte
+    `compat.extends('next/core-web-vitals', 'next/typescript')`-Variante erzeugte mit der aktuell
+    aufgelösten Kombination aus ESLint 9.39.x und den neueren `eslint-plugin-react`-Flat-Configs einen
+    Absturz beim Fehler-Reporting (zirkuläre Referenz beim `JSON.stringify` der Plugin-Konfiguration).
+    `eslint-config-next` 16.3.3 liefert über `@next/eslint-plugin-next` bereits eine native
+    Flat-Config (`configs['core-web-vitals']`); `eslint.config.mjs` nutzt diese jetzt direkt zusammen
+    mit `typescript-eslint` — funktional gleichwertig, ohne den Kompatibilitäts-Layer.
+19. **Vor echter Next.js-Frontend-Arbeit (Phase 3+): `node_modules/next/dist/docs/01-app/` lesen.**
+    Dieses Next.js 16.3.3 schreibt bei jedem `next dev` eine `AGENTS.md`/`CLAUDE.md`-Warnung, dass sich
+    App-Router-Konventionen gegenüber älterem Trainingswissen geändert haben könnten. Phase 2 betraf
+    nur das vom offiziellen `create-payload-app`-Scaffold selbst gesetzte Minimal-Layout (unverändert
+    kompatibel); Phase 3 baut echte Seiten/Layouts und sollte die aktuelle Dokumentation zuerst prüfen,
+    statt sich auf älteres Wissen zu verlassen.
+20. **Verify-Skript für Zugriffskontrolle (`scripts/verify-access-control.ts`)** startet für den Test
+    einen eigenen Next-Dev-Server auf einem Nebenport (3211) statt den laufenden Entwicklungsserver zu
+    nutzen, damit der Checkpoint-Beweis unabhängig und wiederholbar per `pnpm verify:access-control`
+    läuft. Eine vollständige Vitest-Suite dafür folgt in Phase 8.
