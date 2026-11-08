@@ -445,6 +445,10 @@ export interface Service {
       }[]
     | null;
   /**
+   * Für den Abschluss-Abschnitt der Leistungsseite (Briefing §6). Optional.
+   */
+  ansprechperson?: (number | null) | Team;
+  /**
    * Siehe DESIGN.md §8 Zeichnungsmodul.
    */
   zeichnungsvariante?: ('mfh' | 'schnitt' | 'neubau' | 'efh') | null;
@@ -900,6 +904,7 @@ export interface ServicesSelect<T extends boolean = true> {
         antwort?: T;
         id?: T;
       };
+  ansprechperson?: T;
   zeichnungsvariante?: T;
   seo?:
     | T

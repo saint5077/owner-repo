@@ -17,6 +17,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Mehrere Root-Layouts ((frontend)/(payload)) — global-not-found.tsx übernimmt das 404 für
+  // URLs, die keiner Gruppe zuzuordnen sind (siehe Kommentar dort). Phase 7 baut die restlichen
+  // 301-Redirects der alten Wix-Sitemap aus; dieser eine ist schon jetzt ein Einzeiler wert.
+  experimental: {
+    globalNotFound: true,
+  },
+  async redirects() {
+    return [{ source: '/rechtliche-hinweise', destination: '/impressum', permanent: true }]
+  },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],

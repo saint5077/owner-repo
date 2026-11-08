@@ -86,6 +86,11 @@ type ServiceSeed = {
   claim: string
   einleitung: string
   punkte: string[]
+  zeichnungsvariante: 'mfh' | 'schnitt' | 'neubau' | 'efh'
+  // FAQ ist auf allen vier Seiten Entwurf (DESIGN.md §11 — geht über die Phase-0-Textbasis
+  // hinaus) und wird auf der Seite selbst sichtbar als Entwurf markiert, unabhängig von
+  // contentStatus. Keine tagesaktuellen Zahlen (z. B. Referenzzinssatz) — Briefing §6.
+  faq: { frage: string; antwort: string }[]
 }
 
 // Wortlaut 1:1 aus reference/content/*.md übernommen (DESIGN.md §11) — nicht generisch erfunden.
@@ -106,6 +111,34 @@ const SERVICES: ServiceSeed[] = [
       'Kreditoren- und Debitorenbuchhaltung',
       'jährliche Bilanz und Erfolgsrechnung',
     ],
+    zeichnungsvariante: 'mfh',
+    faq: [
+      {
+        frage: 'Wie läuft die Übernahme meiner Liegenschaft ab?',
+        antwort:
+          'Nach einem persönlichen Kennenlerngespräch erstellen wir eine transparente Offerte. Nach Ihrer Zusage übernehmen wir die Unterlagen und sind ab sofort Ihr direkter Ansprechpartner.',
+      },
+      {
+        frage: 'Wie oft erhalte ich eine Abrechnung?',
+        antwort:
+          'Sie erhalten jährlich eine Bilanz und Erfolgsrechnung. Ein unterjähriges Reporting richten wir auf Wunsch ein.',
+      },
+      {
+        frage: 'Wer kümmert sich um Reparaturen und Notfälle?',
+        antwort:
+          'Wir koordinieren Hauswartung und Handwerkeraufträge. Für Schäden an gemieteten Wohnungen steht der Mieterschaft unser Mieterservice zur Verfügung.',
+      },
+      {
+        frage: 'Was passiert bei einem Mieterwechsel?',
+        antwort:
+          'Vermietung sowie Abnahme und Übergabe von Mietobjekten gehören zu unserem Leistungsumfang — von der Ausschreibung bis zur Schlüsselübergabe.',
+      },
+      {
+        frage: 'Bleibe ich über meine Liegenschaft informiert, auch wenn Sie sie verwalten?',
+        antwort:
+          'Ja. Wir legen Wert auf persönliche Betreuung und einen direkten Ansprechpartner — Sie erreichen uns jederzeit.',
+      },
+    ],
   },
   {
     serviceType: 'erstvermietung',
@@ -119,6 +152,32 @@ const SERVICES: ServiceSeed[] = [
       'Besichtigungstermine mit Mietinteressenten sowie die Bonitätsprüfung der Interessenten',
       'Ausarbeitung von Mietverträgen',
       'Objektübergaben',
+    ],
+    zeichnungsvariante: 'neubau',
+    faq: [
+      {
+        frage: 'Wie wird der Mietzins für mein Objekt festgelegt?',
+        antwort:
+          'Wir ermitteln ihn anhand der aktuellen Marktsituation und der Vermietbarkeit Ihres Objekts — nicht anhand pauschaler Werte ohne Objektkenntnis.',
+      },
+      {
+        frage: 'Wie läuft die Mieterauswahl ab?',
+        antwort:
+          'Nach Besichtigungen mit Mietinteressenten führen wir eine Bonitätsprüfung durch und wählen nach nachvollziehbaren Kriterien aus.',
+      },
+      {
+        frage: 'Wo wird mein Objekt inseriert?',
+        antwort: 'Wir schalten und koordinieren Inserate in Printmedien und im Internet.',
+      },
+      {
+        frage: 'Wie lange dauert es bis zur Vermietung?',
+        antwort:
+          'Das hängt von Objekt und Marktlage ab — eine pauschale Zusage können wir ohne Objektkenntnis nicht machen.',
+      },
+      {
+        frage: 'Was beinhaltet die Objektübergabe?',
+        antwort: 'Ein Übergabeprotokoll mit Zählerständen sowie die Schlüsselübergabe an die neue Mieterschaft.',
+      },
     ],
   },
   {
@@ -134,6 +193,33 @@ const SERVICES: ServiceSeed[] = [
       'Vermittlung von Kauf-/Verkaufsinteressenten',
       'Beratung und Ausarbeitung von Kaufverträgen',
       'Erledigung sämtlicher Formalitäten (u. a. auch mit Behörden und Ämtern)',
+    ],
+    zeichnungsvariante: 'efh',
+    faq: [
+      {
+        frage: 'Wie wird der Verkaufspreis ermittelt?',
+        antwort:
+          'Wir beraten Sie auf Basis von Lage, Zustand und Marktlage Ihrer Liegenschaft — eine pauschale Online-Schätzung ersetzt das nicht.',
+      },
+      {
+        frage: 'Bleibt der Verkauf diskret?',
+        antwort:
+          'Ja. Wir stimmen die Vermarktung mit Ihnen ab, auch ein diskreter Verkauf ohne öffentliche Referenzen ist möglich.',
+      },
+      {
+        frage: 'Welche Unterlagen braucht es für den Verkauf?',
+        antwort:
+          'Die Verkaufsdokumentation erstellen wir für Sie. Grundbuchauszug, Pläne und weitere Unterlagen beschaffen wir nach Bedarf.',
+      },
+      {
+        frage: 'Wie läuft die Beurkundung ab?',
+        antwort: 'Wir begleiten Sie bis zur notariellen Beurkundung und zur Übergabe der Liegenschaft.',
+      },
+      {
+        frage: 'Kann ich auch eine Renditeliegenschaft verkaufen lassen?',
+        antwort:
+          'Ja — wir begleiten den Verkauf von Renditeliegenschaften, Einfamilienhäusern, Stockwerkeinheiten sowie Gewerbe- und Industrieobjekten.',
+      },
     ],
   },
   {
@@ -151,6 +237,32 @@ const SERVICES: ServiceSeed[] = [
       'Reglement und Hausordnung',
       'Unterhalt der gemeinschaftlichen Teile',
       'Versicherungen und Schadenregulierung',
+    ],
+    zeichnungsvariante: 'schnitt',
+    faq: [
+      {
+        frage: 'Wie oft findet die Eigentümerversammlung statt?',
+        antwort:
+          'Mindestens einmal jährlich als ordentliche Versammlung. Bei Bedarf organisieren wir zusätzlich ausserordentliche Versammlungen.',
+      },
+      {
+        frage: 'Wer erstellt Budget und Jahresrechnung?',
+        antwort: 'Wir erstellen beides und legen sie der Eigentümerversammlung zur Genehmigung vor.',
+      },
+      {
+        frage: 'Was ist der Erneuerungsfonds und wie wird er verwaltet?',
+        antwort:
+          'Der Erneuerungsfonds sichert künftige Sanierungen der Liegenschaft. Wir äufnen und verwalten ihn für die Gemeinschaft.',
+      },
+      {
+        frage: 'Was passiert bei einem Schaden am Gemeinschaftseigentum?',
+        antwort: 'Versicherungsfälle und Schadenregulierung für die gemeinschaftlichen Teile übernehmen wir.',
+      },
+      {
+        frage: 'Kann ich als Stockwerkeigentümer:in Anträge für die Versammlung stellen?',
+        antwort:
+          'Ja, eine Traktandierung ist möglich. Die Fristen dafür richten sich nach dem Reglement Ihrer Gemeinschaft.',
+      },
     ],
   },
 ]
@@ -192,6 +304,8 @@ async function upsertService(payload: Payload, svc: ServiceSeed) {
         punkte: svc.punkte.map((text) => ({ text })),
       },
     ],
+    zeichnungsvariante: svc.zeichnungsvariante,
+    faq: svc.faq.map((f) => ({ frage: f.frage, antwort: richTextFromParagraphs([f.antwort]) })),
     _status: 'published' as const,
   }
   if (existing.docs[0]) {
@@ -300,7 +414,84 @@ async function seedHome(payload: Payload) {
         { label: 'Ich wohne in einer Liegenschaft von Nora', linkZiel: '/mieterservice' },
         { label: 'Ich suche eine Wohnung', linkZiel: '/objekte' },
       ],
+      // Entwurf nach Briefing §6.1.5 — auf der Seite selbst sichtbar als unbestätigt markiert
+      // (DESIGN.md §11, CONTENT_TODO.md).
+      ablaufSchritte: [
+        {
+          schritt: 'Kennenlernen',
+          beschreibung: 'Ein persönliches Gespräch, in dem wir Ihre Liegenschaft und Ihre Anliegen kennenlernen.',
+        },
+        {
+          schritt: 'Offerte',
+          beschreibung: 'Sie erhalten eine transparente Offerte für die gewünschten Leistungen.',
+        },
+        {
+          schritt: 'Übergabe',
+          beschreibung: 'Wir übernehmen die Unterlagen und organisieren einen reibungslosen Wechsel.',
+        },
+        {
+          schritt: 'Laufende Betreuung',
+          beschreibung: 'Ab sofort sind wir Ihr direkter Ansprechpartner für Ihre Liegenschaft.',
+        },
+      ],
       _status: 'published',
+    },
+  })
+}
+
+async function seedAbout(payload: Payload) {
+  await payload.updateGlobal({
+    slug: 'about',
+    data: {
+      // Wortlaut nah an reference/content/home.md (Haltungsabschnitt der alten Seite),
+      // Rechtschreibung/Grossschreibung korrigiert — keine neu erfundenen Aussagen.
+      haltungText: richTextFromParagraphs([
+        'Als kleines und engagiertes Team gehen wir sehr persönlich auf Ihre Bedürfnisse ein.',
+        '100 % in privatem Besitz zählt für uns nur die Partnerschaft mit unserer Kundschaft. Um Ihre Privatsphäre zu schützen, verzichten wir auf Referenzobjekte auf dieser Website und freuen uns stattdessen auf ein persönliches Gespräch mit Ihnen.',
+        'Nora Immobilien AG wurde 1979 gegründet und ist Mitglied des Schweizerischen Verbands der Immobilien-Treuhänder (SVIT) sowie der FIABCI, der International Real Estate Federation.',
+      ]),
+    },
+  })
+}
+
+async function seedTenantService(payload: Payload) {
+  await payload.updateGlobal({
+    slug: 'tenantService',
+    data: {
+      notfallStatusHinweis: 'Entwurf – vor Go-live fachlich/rechtlich prüfen lassen.',
+      notfallText: richTextFromParagraphs([
+        'Polizei: 117 — Feuerwehr: 118 — Sanität: 144 — Europäischer Notruf: 112',
+        'Pikett- bzw. Notfallnummer ausserhalb der Bürozeiten: [[TODO: vom Kunden erhalten]]',
+        'Bei Gasgeruch: kein offenes Feuer, keine elektrischen Schalter betätigen, Fenster öffnen, Gebäude verlassen und von draussen 118 oder den Gas-Notruf des zuständigen Versorgers [[TODO: Nummer vom Kunden erhalten]] anrufen.',
+      ]),
+      faq: [
+        {
+          frage: 'Wie melde ich einen Schaden?',
+          antwort: richTextFromParagraphs(['Über das Formular «Schaden melden» auf dieser Seite.']),
+        },
+        {
+          frage: 'Was mache ich bei einem Notfall ausserhalb der Bürozeiten?',
+          antwort: richTextFromParagraphs(['Beachten Sie die Notfall-Hinweise oben auf dieser Seite.']),
+        },
+        {
+          frage: 'Wo finde ich Formulare wie Kündigung oder Untermietgesuch?',
+          antwort: richTextFromParagraphs([
+            'Im Abschnitt «Formulare zum Download» weiter unten, sobald diese hinterlegt sind.',
+          ]),
+        },
+        {
+          frage: 'Wie lange im Voraus muss ich kündigen?',
+          antwort: richTextFromParagraphs([
+            'Die Kündigungsfrist richtet sich nach Ihrem Mietvertrag. Bei Fragen wenden Sie sich direkt an uns.',
+          ]),
+        },
+        {
+          frage: 'Darf ich Haustiere halten oder untervermieten?',
+          antwort: richTextFromParagraphs([
+            'Das richtet sich nach Mietvertrag und Hausordnung. Im Zweifel fragen Sie bitte vorher bei uns nach.',
+          ]),
+        },
+      ],
     },
   })
 }
@@ -367,9 +558,11 @@ async function main() {
     await upsertExampleProperty(payload, p)
   }
 
-  console.log('Seed: siteSettings, home, legal …')
+  console.log('Seed: siteSettings, home, about, tenantService, legal …')
   await seedSiteSettings(payload)
   await seedHome(payload)
+  await seedAbout(payload)
+  await seedTenantService(payload)
   await seedLegal(payload)
 
   console.log('Seed abgeschlossen.')

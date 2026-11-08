@@ -1,6 +1,14 @@
-import type { GlobalConfig } from 'payload'
+import type { GlobalAfterChangeHook, GlobalConfig } from 'payload'
 
 import { anyoneRead, isLoggedIn } from '../access'
+import { revalidateLayoutAll } from '../lib/revalidation'
+
+// siteSettings speist Header/Footer auf jeder Seite (gemeinsames Layout) — die ganze Layout-
+// Ebene invalidieren statt einzelne Pfade aufzuzählen (DECISIONS.md #26).
+const revalidateSiteSettings: GlobalAfterChangeHook = ({ doc }) => {
+  revalidateLayoutAll()
+  return doc
+}
 
 const WOCHENTAGE = [
   { label: 'Montag', value: 'mo' },
@@ -14,6 +22,7 @@ const WOCHENTAGE = [
 
 export const SiteSettings: GlobalConfig = {
   slug: 'siteSettings',
+  hooks: { afterChange: [revalidateSiteSettings] },
   access: {
     read: anyoneRead,
     update: isLoggedIn,

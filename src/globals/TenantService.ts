@@ -1,10 +1,17 @@
-import type { GlobalConfig } from 'payload'
+import type { GlobalAfterChangeHook, GlobalConfig } from 'payload'
 
 import { anyoneRead, isLoggedIn } from '../access'
 import { seoField } from '../fields/seo'
+import { revalidatePaths } from '../lib/revalidation'
+
+const revalidateTenantService: GlobalAfterChangeHook = ({ doc }) => {
+  revalidatePaths(['/mieterservice', '/mieterservice/schadenmeldung'])
+  return doc
+}
 
 export const TenantService: GlobalConfig = {
   slug: 'tenantService',
+  hooks: { afterChange: [revalidateTenantService] },
   access: {
     read: anyoneRead,
     update: isLoggedIn,

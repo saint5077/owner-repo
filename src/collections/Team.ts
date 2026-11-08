@@ -1,12 +1,27 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionConfig } from 'payload'
 
 import { anyoneRead, isLoggedIn } from '../access'
+import { revalidatePaths } from '../lib/revalidation'
+
+// Team erscheint auf der Startseite und auf /ueber-uns — DECISIONS.md #26.
+const revalidateTeam: CollectionAfterChangeHook = ({ doc }) => {
+  revalidatePaths(['/', '/ueber-uns'])
+  return doc
+}
+const revalidateTeamOnDelete: CollectionAfterDeleteHook = ({ doc }) => {
+  revalidatePaths(['/', '/ueber-uns'])
+  return doc
+}
 
 export const Team: CollectionConfig = {
   slug: 'team',
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'rolle', 'reihenfolge'],
+  },
+  hooks: {
+    afterChange: [revalidateTeam],
+    afterDelete: [revalidateTeamOnDelete],
   },
   access: {
     read: anyoneRead,

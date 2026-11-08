@@ -148,3 +148,55 @@ Blocker werden als Frage gestellt. Wird während des gesamten Projekts fortgefü
     `apple-icon.png` 180×180 mit Kalk-Hintergrund, PWA-Icons 192/512 plus `manifest.json`) — über ein
     einmaliges Build-Skript (Sharp für SVG→PNG, Pillow für die Mehrgrössen-ICO-Verpackung), nicht als
     laufender `pnpm`-Task, da es sich nicht ändert, solange das Logo gleich bleibt.
+
+## Phase 4 — Kerninhalt-Seiten
+
+26. **Revalidierung: Payload-`afterChange`-Hooks rufen `revalidatePath`/`revalidatePath(..., 'layout')`
+    direkt auf**, zusätzlich zum täglichen `revalidate = 86400`-Sicherheitsnetz aus DECISIONS.md #11.
+    Da Payload im selben Next.js-Prozess läuft und über `/api/[...slug]/route.ts` (einen echten Route
+    Handler) bedient wird, ist `revalidatePath` dort laut Next-Doku gültig. `siteSettings` invalidiert
+    die ganze Layout-Ebene (`revalidatePath('/', 'layout')`), da Header/Footer auf jeder Seite davon
+    abhängen; `services`/`team`/`properties` invalidieren gezielt die betroffenen Routen. Ausserhalb
+    eines Request-Kontexts (z. B. `pnpm seed`) schlägt `revalidatePath` fehl — abgefangen, kein
+    Seed-Abbruch.
+27. **`services` erhält ein neues Feld `ansprechperson`** (Relation zu `team`), das im ursprünglichen
+    Phase-2-Schema fehlte, obwohl der Abschluss-Abschnitt jeder Leistungsseite laut Briefing §6 eine
+    Ansprechperson zeigen soll. Bewusst ungeseedet gelassen (keine bestätigte Zuordnung Person↔Leistung)
+    — die Redaktion trägt das später im Admin ein, die Seite blendet den Abschnitt bis dahin einfach aus.
+28. **Kein per-Leistung „Ablauf"** gebaut, obwohl das Feld existiert. Die einzige echte, vom Briefing
+    selbst benannte Abfolge ist „So übernehmen wir Ihre Liegenschaft" auf der Startseite (§6.1.5) — die
+    wurde als Entwurf umgesetzt. Für die vier Leistungsseiten selbst eine zusätzliche Schritt-für-Schritt-
+    Abfolge zu erfinden, ohne dass die alte Seite oder das Briefing eine liefert, wäre über „nur bei
+    echter Abfolge" hinausgegangen (DESIGN.md §10).
+29. **FAQ auf allen vier Leistungsseiten sowie im Mieterservice ist durchgehend Entwurf** (neue Inhalte,
+    nicht aus Phase 0) — im Unterschied zu `contentStatus` auf `services` (das nur die "Was wir
+    übernehmen"-Liste betrifft) wird das FAQ unabhängig davon immer mit einem sichtbaren
+    Entwurfs-Hinweis gerendert, nie stillschweigend als bestätigt dargestellt.
+30. **`/objekte` bekommt in Phase 4 schon ein einfaches Kartenraster statt eines reinen Platzhalters**
+    (keine Filter/Karte/Sortierung — das bleibt Phase 5), damit „Freie Objekte ansehen" auf der
+    Startseite und der Navigationspunkt nicht ins Leere laufen. Objektkarten ohne Galeriebild (aktuell
+    alle drei Beispielobjekte) zeigen stellvertretend eine Zeichnung aus dem Modul statt eines leeren
+    Feldes — konsequente Weiterführung von „Zeichnung statt Foto" auch dort, wo noch kein Foto
+    hinterlegt ist.
+31. **404 über `global-not-found.tsx` (experimentell) plus `(frontend)/not-found.tsx`.** Das Projekt hat
+    zwei Root-Layouts ((frontend), (payload)), laut Next-Doku genau der Fall, für den
+    `experimental.globalNotFound` vorgesehen ist — ein gewöhnliches `app/not-found.tsx` könnte sonst
+    nicht jede beliebige, keiner Gruppe zuordenbare URL abfangen. `global-not-found.tsx` bewusst ohne
+    Payload-Datenabruf (umgeht laut Doku das normale Rendering) und mit eigenem, einfachem Header statt
+    der interaktiven `Header`-Komponente.
+32. **Formulare auf den Leistungsseiten, Kontakt und der Schadenmeldung sind bewusst kein `<form>`-
+    Element**, sondern reine Feld-Optik ohne `onSubmit`/`action` (`FieldShape`-Komponenten, Felder
+    durchgehend `disabled`). Verhindert ein versehentliches Browser-GET beim Drücken von Enter und macht
+    ehrlich sichtbar, dass der Versand erst in Phase 6 (Server Actions, Zod, Spam-Schutz) folgt, statt
+    eine halbfunktionierende Form vorzutäuschen.
+33. **Screenshot-Selbstkritik, zwei Funde:** (1) Teamfotos erschienen in `fullPage`-Screenshots leer —
+    verifiziert als Artefakt von nativem `loading="lazy"` kombiniert mit Playwrights `fullPage`-Capture
+    (kein Scrollen vor der Aufnahme), nicht als echter Fehler: mit Scroll-Through sichtbar korrekt, auch
+    über die REST- und Local-API bereits korrekt mit `url` befüllt. (2) Die mobile Aktionsleiste scheint
+    in `fullPage`-Screenshots mehrfach mitten auf der Seite auf (Chromium zeichnet `position: fixed`-
+    Elemente beim Zusammenfügen eines Full-Page-Screenshots an jedem Viewport-Höhen-Intervall erneut) —
+    mit echten, nicht zusammengesetzten Viewport-Screenshots (`scrollIntoViewIfNeeded`, kein `fullPage`)
+    verifiziert, dass kein Inhalt dauerhaft unerreichbar hinter der Leiste hängen bleibt (anders als der
+    in Phase 3 gefundene und behobene Footer-Fall, wo das tatsächliche Seitenende betroffen war). Für
+    `fullPage`-Screenshots auf Seiten mit `position: fixed`-Elementen künftig gezielte
+    Viewport-Screenshots statt `fullPage` verwenden, um solche Artefakte nicht erneut fehlzudeuten.

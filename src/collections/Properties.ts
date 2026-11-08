@@ -1,13 +1,23 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionConfig } from 'payload'
 
 import { isLoggedIn, publishedOrLoggedIn } from '../access'
 import { slugField } from '../fields/slug'
 import { seoField } from '../fields/seo'
+import { revalidatePaths } from '../lib/revalidation'
 
 const KREISE = Array.from({ length: 12 }, (_, i) => ({
   label: `Kreis ${i + 1}`,
   value: String(i + 1),
 }))
+
+// Betrifft den Startseiten-Teaser "Aktuelle Objekte" und die /objekte-Liste (Phase 5 baut die
+// Detailseite /objekte/[slug] mit dynamischer Revalidierung aus) — DECISIONS.md #26.
+const revalidateProperty: CollectionAfterChangeHook = () => {
+  revalidatePaths(['/', '/objekte'])
+}
+const revalidatePropertyOnDelete: CollectionAfterDeleteHook = () => {
+  revalidatePaths(['/', '/objekte'])
+}
 
 export const Properties: CollectionConfig = {
   slug: 'properties',
@@ -18,6 +28,10 @@ export const Properties: CollectionConfig = {
   versions: {
     drafts: true,
     maxPerDoc: 25,
+  },
+  hooks: {
+    afterChange: [revalidateProperty],
+    afterDelete: [revalidatePropertyOnDelete],
   },
   access: {
     read: publishedOrLoggedIn,

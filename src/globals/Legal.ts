@@ -1,9 +1,16 @@
-import type { GlobalConfig } from 'payload'
+import type { GlobalAfterChangeHook, GlobalConfig } from 'payload'
 
 import { anyoneRead, isLoggedIn } from '../access'
+import { revalidatePaths } from '../lib/revalidation'
+
+const revalidateLegal: GlobalAfterChangeHook = ({ doc }) => {
+  revalidatePaths(['/impressum', '/datenschutz'])
+  return doc
+}
 
 export const Legal: GlobalConfig = {
   slug: 'legal',
+  hooks: { afterChange: [revalidateLegal] },
   access: {
     read: anyoneRead,
     update: isLoggedIn,

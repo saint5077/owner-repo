@@ -1,7 +1,19 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionConfig } from 'payload'
 
 import { isLoggedIn, publishedOrLoggedIn } from '../access'
 import { seoField } from '../fields/seo'
+import { revalidatePaths } from '../lib/revalidation'
+
+// Die Leistungsseite selbst plus die Startseite (Leistungen-Index, Abschnitt "Leistungen") hängen
+// vom jeweiligen Dokument ab — siehe DECISIONS.md #26 (Revalidierungsstrategie, Phase 4).
+const revalidateService: CollectionAfterChangeHook = ({ doc }) => {
+  revalidatePaths(['/', `/${doc.serviceType}`])
+  return doc
+}
+const revalidateServiceOnDelete: CollectionAfterDeleteHook = ({ doc }) => {
+  revalidatePaths(['/', `/${doc.serviceType}`])
+  return doc
+}
 
 // Bewusst keine freie Page-Builder-Struktur — strukturierte Felder schützen das Design (Briefing §8).
 export const Services: CollectionConfig = {
@@ -12,6 +24,10 @@ export const Services: CollectionConfig = {
     description: 'Genau vier Einträge, einer je fixer Leistungsroute (/bewirtschaftung etc.).',
   },
   versions: { drafts: true },
+  hooks: {
+    afterChange: [revalidateService],
+    afterDelete: [revalidateServiceOnDelete],
+  },
   access: {
     read: publishedOrLoggedIn,
     create: isLoggedIn,
@@ -76,6 +92,12 @@ export const Services: CollectionConfig = {
         { name: 'frage', type: 'text', localized: true },
         { name: 'antwort', type: 'richText', localized: true },
       ],
+    },
+    {
+      name: 'ansprechperson',
+      type: 'relationship',
+      relationTo: 'team',
+      admin: { description: 'Für den Abschluss-Abschnitt der Leistungsseite (Briefing §6). Optional.' },
     },
     {
       name: 'zeichnungsvariante',

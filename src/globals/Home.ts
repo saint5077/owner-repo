@@ -1,11 +1,18 @@
-import type { GlobalConfig } from 'payload'
+import type { GlobalAfterChangeHook, GlobalConfig } from 'payload'
 
 import { isLoggedIn, publishedOrLoggedIn } from '../access'
 import { seoField } from '../fields/seo'
+import { revalidatePaths } from '../lib/revalidation'
+
+const revalidateHome: GlobalAfterChangeHook = ({ doc }) => {
+  revalidatePaths(['/'])
+  return doc
+}
 
 export const Home: GlobalConfig = {
   slug: 'home',
   versions: { drafts: true },
+  hooks: { afterChange: [revalidateHome] },
   access: {
     read: publishedOrLoggedIn,
     update: isLoggedIn,

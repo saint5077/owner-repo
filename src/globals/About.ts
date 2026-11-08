@@ -1,10 +1,17 @@
-import type { GlobalConfig } from 'payload'
+import type { GlobalAfterChangeHook, GlobalConfig } from 'payload'
 
 import { anyoneRead, isLoggedIn } from '../access'
 import { seoField } from '../fields/seo'
+import { revalidatePaths } from '../lib/revalidation'
+
+const revalidateAbout: GlobalAfterChangeHook = ({ doc }) => {
+  revalidatePaths(['/ueber-uns'])
+  return doc
+}
 
 export const About: GlobalConfig = {
   slug: 'about',
+  hooks: { afterChange: [revalidateAbout] },
   access: {
     read: anyoneRead,
     update: isLoggedIn,

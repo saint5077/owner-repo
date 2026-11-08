@@ -4,6 +4,7 @@ import Link from 'next/link'
 import type { SiteSetting } from '@/payload-types'
 
 import { Logo } from '@/components/branding/Logo'
+import { WOCHENTAG_LABEL } from '@/lib/wochentage'
 
 import { Container } from './Container'
 
@@ -17,16 +18,6 @@ const NAV = [
   { label: 'Über uns', href: '/ueber-uns' },
   { label: 'Kontakt', href: '/kontakt' },
 ]
-
-const WOCHENTAG_LABEL: Record<string, string> = {
-  mo: 'Mo',
-  di: 'Di',
-  mi: 'Mi',
-  do: 'Do',
-  fr: 'Fr',
-  sa: 'Sa',
-  so: 'So',
-}
 
 type FooterProps = { siteSettings: SiteSetting | null }
 

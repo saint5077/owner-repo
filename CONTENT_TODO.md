@@ -64,3 +64,6 @@ Abschnitt 16.
 
 - [ ] Credit-Zeile "Website: Axion" im Footer — Formulierung/Verlinkung final abstimmen.
 - [ ] Domain-Registrar bestätigen (vermutlich bei Wix registriert) für die Go-live-Migration.
+- [ ] **Ansprechperson pro Leistungsseite** (Abschluss-Abschnitt von Bewirtschaftung/Stockwerkeigentum/
+      Erstvermietung/Verkauf) im Admin zuweisen — Feld existiert, ist aber bewusst ungeseedet, da keine
+      Zuordnung Person↔Leistung bestätigt ist (Phase 4).
