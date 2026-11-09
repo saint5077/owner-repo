@@ -205,3 +205,32 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+/*
+ * Druck-Stylesheet fürs Objekt-Exposé (Briefing §6 Objektdetail, Umsetzungsplan Phase 5):
+ * Navigation, Aktionsleiste und alles `print:hidden`-Markierte (Lightbox-Buttons, Formulare,
+ * Karte, Teilen-Button) verschwinden; übrig bleibt ein ruhiges, einseitiges Dokument aus
+ * Fakten und Beschreibung plus dem separaten Druck-Titelbild (siehe ObjektDetailPage).
+ */
+@media print {
+  header,
+  footer,
+  .nora-skip-link {
+    display: none !important;
+  }
+
+  main {
+    padding-top: 0 !important;
+  }
+
+  html,
+  body {
+    background: #fff;
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}

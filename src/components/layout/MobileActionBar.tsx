@@ -4,7 +4,7 @@ type MobileActionBarProps = { telefon?: string }
 
 export function MobileActionBar({ telefon }: MobileActionBarProps) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-sandstein/30 bg-weiss lg:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-sandstein/30 bg-weiss lg:hidden print:hidden">
       <div className="grid grid-cols-3">
         {telefon ? (
           <a

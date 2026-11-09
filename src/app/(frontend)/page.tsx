@@ -165,7 +165,7 @@ export default async function HomePage() {
           ) : (
             <p className="nora-prose mt-6 text-tinte-hell">
               Zurzeit sind alle Objekte vergeben.{' '}
-              <Link href="/objekte" className="hover:text-fensterladen">
+              <Link href="/suchabo" className="hover:text-fensterladen">
                 Richten Sie ein Suchabo ein
               </Link>{' '}
               — wir melden uns, sobald etwas Passendes frei wird.

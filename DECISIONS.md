@@ -200,3 +200,70 @@ Blocker werden als Frage gestellt. Wird während des gesamten Projekts fortgefü
     in Phase 3 gefundene und behobene Footer-Fall, wo das tatsächliche Seitenende betroffen war). Für
     `fullPage`-Screenshots auf Seiten mit `position: fixed`-Elementen künftig gezielte
     Viewport-Screenshots statt `fullPage` verwenden, um solche Artefakte nicht erneut fehlzudeuten.
+
+## Phase 5 — Objekte (Liste, Filter, Karte, Detail)
+
+34. **Node-eigenes `fetch` braucht `NODE_USE_ENV_PROXY=1`, um in dieser Sandbox über den
+    Agent-Proxy zu gehen.** `curl` respektiert `HTTPS_PROXY` automatisch, Node ≥22.21 tut das für
+    sein eingebautes `fetch` nur mit diesem Flag (siehe `/root/.ccr/README.md`). Ohne das Flag
+    scheiterte die swisstopo-Geokodierung in `src/lib/geocode.ts` lautlos (der absichtliche
+    try/catch zum Nichtblockieren des Speicherns schluckte den Fehler) — über `curl` sah die
+    exakt gleiche Anfrage erfolgreich aus, was die eigentliche Ursache zunächst verdeckte, bis ein
+    isolierter Node-`fetch`-Test ohne das Flag denselben stillen Fehlschlag reproduzierte. Fix:
+    `NODE_USE_ENV_PROXY=1` in den `dev`/`build`/`start`/`seed`-Skripten via `cross-env` gesetzt. In
+    echter Produktion (Vercel) ist das Flag wirkungslos, da dort kein `HTTPS_PROXY` gesetzt ist —
+    rein eine Sandbox-Notwendigkeit, kein Produktionsverhalten.
+35. **maplibre-gl 6.x hat keinen Default-Export mehr** (anders als ältere Major-Versionen) —
+    `import { Map, Marker, NavigationControl, LngLatBounds, setWorkerUrl } from 'maplibre-gl'`
+    (benannte Importe) statt `import maplibregl from 'maplibre-gl'`. Gegen die tatsächlich
+    installierte `.d.ts` geprüft, nicht angenommen — `tsc` schlug mit der alten Schreibweise sofort
+    fehl.
+36. **maplibre-gl braucht einen manuell gehosteten Worker unter Turbopack.** Die Bibliothek lädt
+    ihren Web Worker intern über `new Worker(new URL(e, import.meta.url))` mit `e` als
+    Laufzeit-Variable statt Stringliteral — Turbopack kann das nicht statisch als Asset erkennen
+    und bündelt die Worker-Datei nicht; zur Laufzeit scheiterte das mit "Worker failed to load"
+    (im Next-Dev-Overlay als rotes "1 Issue"-Badge sichtbar, über Playwright-Konsolen-Logs
+    verifiziert). Fix laut maplibre-gl selbst: `dist/maplibre-gl-worker.mjs` nach
+    `public/vendor/maplibre-gl-worker.mjs` kopiert und vor der ersten `Map`-Instanz
+    `setWorkerUrl('/vendor/maplibre-gl-worker.mjs')` aufgerufen (von maplibre-gl für genau diesen
+    Zweck exportiert). Bei einem Upgrade von maplibre-gl muss diese Datei manuell nachgezogen
+    werden — vermerkt hier, da kein automatischer Copy-Schritt existiert.
+37. **swisstopo liefert Kacheln von fünf gesharded Subdomains**, nicht nur
+    `vectortiles.geo.admin.ch` (das nur das Style-JSON selbst bedient). Die TileJSON-Antwort hinter
+    jeder `source.url` listet `vectortiles0.geo.admin.ch` bis `vectortiles4.geo.admin.ch` als
+    echte Kachel-URLs — per `curl` gegen die echte API verifiziert, nicht angenommen. Alle fünf
+    zur Netzwerk-Allowlist dieser Sandbox hinzugefügt (reine Sandbox-Einschränkung, in Produktion
+    ohne Allowlist irrelevant).
+38. **Filter/Sortierung/Ansicht laufen über clientseitige `router.push`-Soft-Navigation**, nicht
+    über ein natives GET-Formular. Beide Ansätze erfüllen "URL-Query-State, teilbar, Zurück-Taste
+    funktioniert" gleichermassen, aber nur die Soft-Navigation lässt die `aria-live`-Trefferzahl-
+    Region als echte Live-Region-Aktualisierung funktionieren (Inhalt ändert sich am selben
+    DOM-Knoten, ohne dass die Seite neu lädt) — mit Playwright verifiziert: Text wechselt von
+    "5 Objekte gefunden." zu "1 Objekt gefunden." bei gleichzeitig aktualisierter URL
+    (`?kreis=4`), ohne vollständige Navigation.
+39. **Preis-bis-Filter erscheint erst, wenn Mieten oder Kaufen gewählt ist** (nicht bei "Alle") —
+    ein einziges CHF-Band für Mietzins (drei-/vierstellig) und Kaufpreis (sechs-/siebenstellig)
+    gleichzeitig wäre bedeutungslos. Ort-Freitextfilter aus Briefing §6 bewusst auf Kreis
+    reduziert (kein separates Textfeld), da `searchAlerts.kriterien` ohnehin nur Kreis kennt und
+    das spätere Suchabo-Matching (Phase 6) exakt auf dieselbe Kriterienmenge trifft.
+40. **Die drei Beispielobjekte haben bewusst keine Strassenadresse** (nur "Zürich, Kreis N", siehe
+    Phase-0-Entscheidung #2) — die swisstopo-Geokodierung läuft für sie deshalb nie, und alle drei
+    demonstrieren naturgemäss den Kreis-Näherungs-Pfad auf der Detailseite, nicht den Pin-Pfad. Um
+    die Privatsphäre-Regel (Pin nur bei `adressePublicAnzeigen` UND vorhandenen Koordinaten, sonst
+    Kreis-Näherung) end-to-end zu verifizieren, wurden zwei temporäre Testobjekte mit derselben
+    echten, öffentlich bekannten Adresse (Bahnhofstrasse 1, 8001 Zürich) angelegt — eines mit
+    `adressePublicAnzeigen: true` (zeigt korrekt einen präzisen Pin), eines mit `false` (zeigt
+    korrekt nur die Kreis-Näherung, obwohl dieselben echten Koordinaten im Datensatz stehen). Beide
+    nach der Verifikation wieder gelöscht, nie geseedet — keine Erfindung einer Kundenadresse,
+    reines QA-Fixture mit einer öffentlich ohnehin bekannten Postadresse.
+41. **Druck-Stylesheet erzwingt Weiss statt Kalk als Hintergrund** (`@media print`) — spart
+    Tonerverbrauch beim tatsächlichen Ausdrucken, rein kosmetisch sonst ohne Wirkung. Die
+    interaktive Galerie bleibt im Druck ausgeblendet (`print:hidden`), ein eigenes, nicht
+    interaktives Druck-Titelbild (erstes Galeriebild oder Zeichnung) wird stattdessen gezeigt statt
+    die Lightbox-Buttons mit auszudrucken.
+42. **`PropertyMap` setzt nach `idle` ein `data-qa-idle`-Attribut auf den Canvas.** Nicht nur für
+    diese Phase: ein stabiler Haken für künftige Playwright-Tests (Phase 8), die sonst nur per
+    Timeout raten könnten, ob die Karte "Canvas existiert" oder "Kacheln sind tatsächlich fertig
+    gerendert" erreicht hat — genau diese Verwechslung erzeugte zunächst einen irreführenden
+    Screenshot mit einer fast leeren Karte (Kamera war per `fitBounds`/`jumpTo` bereits gesprungen,
+    aber die Kacheln für den neuen Ausschnitt waren noch nicht geladen).

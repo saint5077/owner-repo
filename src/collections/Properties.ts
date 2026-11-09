@@ -1,8 +1,14 @@
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionConfig } from 'payload'
+import type {
+  CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
+  CollectionBeforeChangeHook,
+  CollectionConfig,
+} from 'payload'
 
 import { isLoggedIn, publishedOrLoggedIn } from '../access'
 import { slugField } from '../fields/slug'
 import { seoField } from '../fields/seo'
+import { geocodeAddress } from '../lib/geocode'
 import { revalidatePaths } from '../lib/revalidation'
 
 const KREISE = Array.from({ length: 12 }, (_, i) => ({
@@ -10,13 +16,48 @@ const KREISE = Array.from({ length: 12 }, (_, i) => ({
   value: String(i + 1),
 }))
 
-// Betrifft den Startseiten-Teaser "Aktuelle Objekte" und die /objekte-Liste (Phase 5 baut die
-// Detailseite /objekte/[slug] mit dynamischer Revalidierung aus) — DECISIONS.md #26.
-const revalidateProperty: CollectionAfterChangeHook = () => {
-  revalidatePaths(['/', '/objekte'])
+// Betrifft den Startseiten-Teaser "Aktuelle Objekte" und die /objekte-Liste; die Detailseite
+// bekommt zusätzlich ihren eigenen Pfad invalidiert, damit eine Preisänderung o. Ä. sofort
+// sichtbar wird, ohne auf die tägliche `revalidate = 86400`-Backstop zu warten (DECISIONS.md #26).
+const revalidateProperty: CollectionAfterChangeHook = ({ doc }) => {
+  const paths = ['/', '/objekte']
+  if (doc?.slug) paths.push(`/objekte/${doc.slug}`)
+  revalidatePaths(paths)
 }
-const revalidatePropertyOnDelete: CollectionAfterDeleteHook = () => {
-  revalidatePaths(['/', '/objekte'])
+const revalidatePropertyOnDelete: CollectionAfterDeleteHook = ({ doc }) => {
+  const paths = ['/', '/objekte']
+  if (doc?.slug) paths.push(`/objekte/${doc.slug}`)
+  revalidatePaths(paths)
+}
+
+/**
+ * swisstopo-Geokodierung (Briefing §7/Umsetzungsplan Phase 5): befüllt `koordinaten` aus der
+ * Adresse, sobald sich Strasse/PLZ/Ort ändern oder noch keine Koordinaten vorliegen. Läuft nur,
+ * wenn tatsächlich eine Strasse gesetzt ist — die drei Demo-Objekte tragen bewusst keine
+ * (erfundene) Strassenadresse, nur "Zürich, Kreis N" (DECISIONS.md Phase 0 §2), und lösen die
+ * Geokodierung deshalb nie aus; die Detailseite zeigt für sie konsequent den Kreis-Näherungs-
+ * Fallback statt eines Pins. Ein API-Fehler oder Kein-Treffer blockiert das Speichern nicht.
+ */
+const geocodeOnAddressChange: CollectionBeforeChangeHook = async ({ data, originalDoc }) => {
+  const adresse = data.adresse as { strasse?: string; plz?: string; ort?: string } | undefined
+  if (!adresse?.strasse) return data
+
+  const alteAdresse = originalDoc?.adresse as { strasse?: string; plz?: string; ort?: string } | undefined
+  const adresseGeaendert =
+    !originalDoc ||
+    alteAdresse?.strasse !== adresse.strasse ||
+    alteAdresse?.plz !== adresse.plz ||
+    alteAdresse?.ort !== adresse.ort
+  const hatKoordinaten =
+    typeof data.koordinaten?.lat === 'number' && typeof data.koordinaten?.lng === 'number'
+
+  if (!adresseGeaendert && hatKoordinaten) return data
+
+  const treffer = await geocodeAddress(adresse.strasse, adresse.plz, adresse.ort)
+  if (treffer) {
+    data.koordinaten = treffer
+  }
+  return data
 }
 
 export const Properties: CollectionConfig = {
@@ -30,6 +71,7 @@ export const Properties: CollectionConfig = {
     maxPerDoc: 25,
   },
   hooks: {
+    beforeChange: [geocodeOnAddressChange],
     afterChange: [revalidateProperty],
     afterDelete: [revalidatePropertyOnDelete],
   },

@@ -28,7 +28,9 @@ const eslintConfig = [
     },
   },
   {
-    ignores: ['.next/', 'src/payload-types.ts', 'src/payload-generated-schema.ts'],
+    // public/vendor/: selbst gehostete, unveränderte Drittanbieter-Datei (maplibre-gl-worker.mjs,
+    // siehe PropertyMap.tsx), kein eigener Code — minifiziert, nicht lintbar, nicht gemeint.
+    ignores: ['.next/', 'src/payload-types.ts', 'src/payload-generated-schema.ts', 'public/vendor/'],
   },
 ]
 
