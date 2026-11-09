@@ -1,6 +1,7 @@
 import { Container } from '@/components/layout/Container'
 import { LeererGrundriss } from '@/components/drawings'
-import { FormShapeFooter, SelectField, TextField } from '@/components/forms/FieldShape'
+
+import { SuchaboForm } from './SuchaboForm'
 
 export const metadata = { title: 'Suchabo — Nora Immobilien AG' }
 
@@ -27,48 +28,7 @@ export default function SuchaboPage() {
       </section>
 
       <section className="border-t border-sandstein/30 py-14 md:py-20">
-        <div className="nora-grid max-w-3xl gap-y-5">
-          <div className="col-span-12 md:col-span-6">
-            <SelectField label="Angebotsart" options={['Mieten', 'Kaufen', 'Beide']} />
-          </div>
-          <div className="col-span-12 md:col-span-6">
-            <TextField label="E-Mail" type="email" />
-          </div>
-          <div className="col-span-12 md:col-span-4">
-            <TextField label="Zimmer von" type="number" />
-          </div>
-          <div className="col-span-12 md:col-span-4">
-            <TextField label="Zimmer bis" type="number" />
-          </div>
-          <div className="col-span-12 md:col-span-4">
-            <TextField label="Preis bis (CHF)" type="number" />
-          </div>
-          <div className="col-span-12">
-            <span className="nora-nav-label mb-2 block text-tinte-hell">Objektart</span>
-            <div className="flex flex-wrap gap-x-4 gap-y-2">
-              {['Wohnung', 'Maisonette', 'Attika', 'Studio', 'Einfamilienhaus', 'Reihenhaus', 'Büro', 'Gewerbe'].map(
-                (label) => (
-                  <label key={label} className="nora-prose flex items-center gap-2 text-[15px]">
-                    <input type="checkbox" disabled className="h-4 w-4 accent-sandstein" />
-                    {label}
-                  </label>
-                ),
-              )}
-            </div>
-          </div>
-          <div className="col-span-12">
-            <span className="nora-nav-label mb-2 block text-tinte-hell">Kreis</span>
-            <div className="flex flex-wrap gap-x-4 gap-y-2">
-              {Array.from({ length: 12 }, (_, i) => String(i + 1)).map((k) => (
-                <label key={k} className="nora-prose flex items-center gap-1.5 text-[15px]">
-                  <input type="checkbox" disabled className="h-4 w-4 accent-sandstein" />
-                  {k}
-                </label>
-              ))}
-            </div>
-          </div>
-          <FormShapeFooter />
-        </div>
+        <SuchaboForm />
       </section>
     </Container>
   )

@@ -10,6 +10,7 @@ import { slugField } from '../fields/slug'
 import { seoField } from '../fields/seo'
 import { geocodeAddress } from '../lib/geocode'
 import { revalidatePaths } from '../lib/revalidation'
+import { notifyMatchingSearchAlerts } from '../lib/search-alerts/notify'
 
 const KREISE = Array.from({ length: 12 }, (_, i) => ({
   label: `Kreis ${i + 1}`,
@@ -28,6 +29,29 @@ const revalidatePropertyOnDelete: CollectionAfterDeleteHook = ({ doc }) => {
   const paths = ['/', '/objekte']
   if (doc?.slug) paths.push(`/objekte/${doc.slug}`)
   revalidatePaths(paths)
+}
+
+/**
+ * Suchabo-Benachrichtigung (Briefing §8, Phase 6): sobald ein Objekt erstmals "verfügbar" wird,
+ * passende bestätigte Suchabos per E-Mail informieren. Idempotent über `alertsSentAt` — läuft
+ * nie zweimal für dasselbe Objekt (`src/lib/search-alerts/notify.ts`).
+ */
+const notifySearchAlertsOnAvailable: CollectionAfterChangeHook = async ({ doc, previousDoc, req }) => {
+  const wurdeGeradeVerfuegbar = doc.objektstatus === 'verfuegbar' && previousDoc?.objektstatus !== 'verfuegbar'
+  if (!wurdeGeradeVerfuegbar || doc.alertsSentAt) return doc
+
+  try {
+    await notifyMatchingSearchAlerts(req.payload, doc)
+    await req.payload.update({
+      collection: 'properties',
+      id: doc.id,
+      data: { alertsSentAt: new Date().toISOString() },
+      overrideAccess: true,
+    })
+  } catch (error) {
+    console.error('[search-alerts] Benachrichtigung fehlgeschlagen', error)
+  }
+  return doc
 }
 
 /**
@@ -72,7 +96,7 @@ export const Properties: CollectionConfig = {
   },
   hooks: {
     beforeChange: [geocodeOnAddressChange],
-    afterChange: [revalidateProperty],
+    afterChange: [revalidateProperty, notifySearchAlertsOnAvailable],
     afterDelete: [revalidatePropertyOnDelete],
   },
   access: {

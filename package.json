@@ -22,11 +22,16 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
+    "@hookform/resolvers": "^7.0.5",
     "@payloadcms/db-postgres": "3.93.0",
     "@payloadcms/next": "3.93.0",
     "@payloadcms/richtext-lexical": "3.93.0",
     "@payloadcms/translations": "3.93.0",
     "@payloadcms/ui": "3.93.0",
+    "@react-email/components": "^1.0.12",
+    "@react-email/render": "^2.2.0",
+    "@upstash/ratelimit": "^2.2.0",
+    "@upstash/redis": "^1.41.0",
     "cross-env": "^7.0.3",
     "dotenv": "16.4.7",
     "embla-carousel-react": "^8.6.0",
@@ -36,7 +41,10 @@
     "payload": "3.93.0",
     "react": "19.2.6",
     "react-dom": "19.2.6",
-    "sharp": "0.35.4"
+    "react-hook-form": "^7.91.0",
+    "resend": "^6.37.0",
+    "sharp": "0.35.4",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",

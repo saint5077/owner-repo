@@ -1,18 +1,21 @@
-import { Suspense } from 'react'
-
 import { Container } from '@/components/layout/Container'
 import { KontaktBlock } from '@/components/contact/KontaktBlock'
-import { AnliegenSelect } from '@/components/forms/AnliegenSelect'
-import { FormShapeFooter, TextField, TextareaField } from '@/components/forms/FieldShape'
 import { getPayloadClient } from '@/lib/payload'
+
+import { KontaktForm } from './KontaktForm'
 
 export const revalidate = 86400
 
 export const metadata = { title: 'Kontakt — Nora Immobilien AG' }
 
-export default async function KontaktPage() {
+export default async function KontaktPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ anliegen?: string }>
+}) {
   const payload = await getPayloadClient()
   const siteSettings = await payload.findGlobal({ slug: 'siteSettings' }).catch(() => null)
+  const { anliegen } = await searchParams
 
   return (
     <Container>
@@ -22,26 +25,7 @@ export default async function KontaktPage() {
 
       <div className="nora-grid gap-y-14 border-t border-sandstein/30 py-14 md:py-20">
         <div className="col-span-12 md:col-span-7">
-          <div className="nora-grid gap-y-5">
-            <div className="col-span-12">
-              <Suspense fallback={null}>
-                <AnliegenSelect />
-              </Suspense>
-            </div>
-            <div className="col-span-12 md:col-span-6">
-              <TextField label="Name" />
-            </div>
-            <div className="col-span-12 md:col-span-6">
-              <TextField label="Telefon" type="tel" />
-            </div>
-            <div className="col-span-12">
-              <TextField label="E-Mail" type="email" />
-            </div>
-            <div className="col-span-12">
-              <TextareaField label="Nachricht" />
-            </div>
-            <FormShapeFooter />
-          </div>
+          <KontaktForm anliegenInitial={anliegen} />
         </div>
 
         <div className="col-span-12 md:col-span-4 md:col-start-9">

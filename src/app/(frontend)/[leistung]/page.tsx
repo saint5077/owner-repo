@@ -7,8 +7,9 @@ import { Einfamilienhaus, MFHAnsicht, NeubauBalkone, StockwerkSchnitt } from '@/
 import { DraftNotice } from '@/components/ui/DraftNotice'
 import { Prose } from '@/components/ui/Prose'
 import { TeamMember } from '@/components/team/TeamMember'
-import { FormShapeFooter, SelectField, TextField, TextareaField } from '@/components/forms/FieldShape'
 import { getPayloadClient } from '@/lib/payload'
+
+import { LeistungForm } from './LeistungForm'
 
 export const revalidate = 86400
 export const dynamicParams = false
@@ -128,75 +129,8 @@ export default async function LeistungPage({ params }: { params: Promise<{ leist
           <div className="nora-grid gap-y-10">
             <div className="col-span-12 md:col-span-7">
               <h2 className="nora-h2">{istVerkauf ? 'Ersteinschätzung anfragen' : 'Verwaltung anfragen'}</h2>
-              <div className="nora-grid mt-6 gap-y-5">
-                {istVerkauf ? (
-                  <>
-                    <div className="col-span-12 md:col-span-6">
-                      <SelectField
-                        label="Objektart"
-                        options={['Eigenheim', 'Renditeliegenschaft', 'Stockwerkeinheit', 'Gewerbe-/Industrieobjekt']}
-                      />
-                    </div>
-                    <div className="col-span-12 md:col-span-6">
-                      <TextField label="Ort" />
-                    </div>
-                    <div className="col-span-12 md:col-span-4">
-                      <TextField label="Zimmer" type="number" />
-                    </div>
-                    <div className="col-span-12 md:col-span-4">
-                      <TextField label="Fläche (m²)" type="number" />
-                    </div>
-                    <div className="col-span-12 md:col-span-4">
-                      <TextField label="Baujahr" type="number" />
-                    </div>
-                    <div className="col-span-12">
-                      <TextField label="Zustand" />
-                    </div>
-                    <div className="col-span-12">
-                      <SelectField label="Zeithorizont" options={['So bald wie möglich', 'In den nächsten 6 Monaten', 'Noch offen']} />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="col-span-12 md:col-span-6">
-                      <SelectField
-                        label="Art der Liegenschaft"
-                        options={['Mehrfamilienhaus', 'Stockwerkeigentum', 'Gemischt genutzt', 'Gewerbe', 'Einfamilienhaus']}
-                      />
-                    </div>
-                    <div className="col-span-12 md:col-span-6">
-                      <TextField label="Anzahl Einheiten" type="number" />
-                    </div>
-                    <div className="col-span-12 md:col-span-6">
-                      <TextField label="Ort" />
-                    </div>
-                    <div className="col-span-12 md:col-span-6">
-                      <SelectField
-                        label="Heutige Situation"
-                        options={['Selbst verwaltet', 'Andere Verwaltung', 'Neubau']}
-                      />
-                    </div>
-                    <div className="col-span-12 md:col-span-6">
-                      <TextField label="Gewünschter Beginn" type="date" />
-                    </div>
-                    <div className="col-span-12 md:col-span-6">
-                      <TextField label="Rückruf-Zeitfenster" />
-                    </div>
-                  </>
-                )}
-                <div className="col-span-12 md:col-span-6">
-                  <TextField label="Name" />
-                </div>
-                <div className="col-span-12 md:col-span-6">
-                  <TextField label="Telefon" type="tel" />
-                </div>
-                <div className="col-span-12">
-                  <TextField label="E-Mail" type="email" />
-                </div>
-                <div className="col-span-12">
-                  <TextareaField label="Nachricht" />
-                </div>
-                <FormShapeFooter />
+              <div className="mt-6">
+                <LeistungForm variant={istVerkauf ? 'ersteinschaetzung' : 'verwaltung'} />
               </div>
             </div>
 

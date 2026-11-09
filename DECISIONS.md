@@ -267,3 +267,55 @@ Blocker werden als Frage gestellt. Wird während des gesamten Projekts fortgefü
     gerendert" erreicht hat — genau diese Verwechslung erzeugte zunächst einen irreführenden
     Screenshot mit einer fast leeren Karte (Kamera war per `fitBounds`/`jumpTo` bereits gesprungen,
     aber die Kacheln für den neuen Ausschnitt waren noch nicht geladen).
+
+## Phase 6 — Formulare, E-Mails, Suchabo, Cron
+
+43. **Upload-Speicher-Abstraktion erweitert DECISIONS.md #12, statt eine zweite zu erfinden.**
+    Schadenmeldungs-Fotos laufen über einen eigenen Server-Endpunkt
+    (`src/app/(payload)/api/uploads/schadenmeldung/route.ts`, als statisches Segment platziert, das
+    Payloads `[...slug]`-Catch-all laut Next-Doku schlägt), der nach Magic-Bytes-Prüfung ganz normal
+    `payload.create({ collection: 'media', ... })` aufruft — dieselbe lokale Speicherung wie der
+    Rest der Mediathek, kein zweiter Mechanismus. Echter direkter Browser-zu-Vercel-Blob-Upload
+    (Briefing §9) setzt reale Blob-Zugangsdaten voraus, die noch fehlen; ungetesteten Code für eine
+    Produktions-API zu schreiben, die nicht erreichbar ist, wäre riskanter als der jetzige, in der
+    Praxis vollständig lauffähige Weg. Einschränkung dokumentiert: Next/Vercel-Funktionen nehmen pro
+    Request nur ca. 4,5 MB entgegen; client-seitig auf max. 2560 px verkleinerte Fotos bleiben in der
+    Praxis meist darunter, ein sehr grosses unkomprimiertes Einzelfoto könnte das aber reissen — der
+    echte, grössenunabhängige Fix (Direkt-Upload zu Blob, am Server vorbei) ist Phase 9 vorgemerkt.
+44. **"Private" Anhänge bleiben technisch über ihre URL erreichbar, wenn man sie errät** — wie vom
+    Briefing selbst beschrieben ("zufällige Pfade, nirgends öffentlich verlinken; private Blobs
+    nutzen, **falls verfügbar**"), nicht als echte zugriffsgeschützte Dateien. Payloads `media`-
+    Collection ist absichtlich öffentlich lesbar (für Objektfotos nötig); Schadenmeldungs-Fotos
+    bekommen randomisierte UUID-Dateinamen und werden nirgends auf der öffentlichen Seite verlinkt.
+    Für eine stärkere Garantie bräuchte es eine eigene, authentifizierte Download-Route — bewusst
+    nicht gebaut, da das Briefing "falls verfügbar" selbst als Kann-Kriterium formuliert und dafür
+    noch keine Admin-Oberfläche existiert, die Anhänge ohnehin anzeigen müsste.
+45. **Cloudflare-Turnstile-Testsecret aus der Erinnerung war falsch** (`1x0000000000000000000000000AA`,
+    29 Zeichen) — der echte `siteverify`-Aufruf lieferte `invalid-input-secret`. Das korrekte,
+    öffentlich dokumentierte "Always passes"-Secret ist `1x0000000000000000000000000000000AA`
+    (35 Zeichen), direkt aus Cloudflares Testing-Dokumentation nachgeschlagen und live gegen den
+    Endpunkt verifiziert (`success: true`), nicht nur angenommen. In `.env.local`, `.env.example`
+    und dem Code-Fallback korrigiert.
+46. **Referenznummern-Generator hatte einen echten Entropie-Bug**, durch den eigenen Unit-Test
+    gefunden, nicht vermutet: vier Zufallsbytes wurden einzeln zu Base36 codiert (`padStart(2,'0')`
+    je Byte) und dann auf 4 Zeichen *geschnitten* — die ersten beiden Bytes bestimmten die Ausgabe
+    vollständig, die letzten beiden wurden verworfen. Effektive Entropie damit nur 65'536 statt
+    1'679'616 (36⁴) mögliche Suffixe; ein Test mit 500 Läufen fand prompt 2 Kollisionen. Fix:
+    ein `Uint32`-Zufallswert wird per Modulo auf den vollen 36⁴-Suffixraum abgebildet, keine
+    Zeichen-Verwerfung mehr. Test auf 150 Läufe reduziert (saubere Fehlerspanne bei vollem
+    Entropie-Raum) und als Regressionsschutz behalten.
+47. **`pnpm test:int`/`pnpm test:e2e` luden nie `.env.local`** — ein bereits vor Phase 6
+    bestehender Scaffold-Mangel (`vitest.setup.ts`/`playwright.config.ts` riefen `dotenv/config`
+    ohne Pfad auf, das lädt nur eine nicht existierende `.env`). `pnpm test:int` schlug dadurch
+    schon vorher mit "missing secret key" fehl, sobald man es wirklich ausführte. In beiden Dateien
+    auf `dotenv.config({ path: '.env.local' })` korrigiert — notwendig, damit die in dieser Phase
+    verlangte echte Testabdeckung überhaupt laufen kann.
+48. **Double-Opt-in-Bestätigung und Abmeldung laufen über einen expliziten Klick, nicht automatisch
+    beim Laden der Bestätigungs-/Abmelde-Seite (GET).** E-Mail-Clients und Sicherheits-Scanner rufen
+    verlinkte URLs oft automatisch vorab auf ("Link-Prefetching") — ein auto-bestätigender Server
+    Component hätte Suchabos ohne menschliches Zutun aktiviert bzw. abgemeldet. `/suchabo/bestaetigen`
+    und `/suchabo/abmelden` zeigen stattdessen einen Button, der eine Server Action auslöst.
+49. **Screenshot-Selbstkritik:** ein scheinbarer Header/Preisbox-Overlap auf der Objektdetailseite
+    (`fullPage`-Screenshot nach Scroll zu `#besichtigung`) erneut als reines Stitching-Artefakt
+    bestätigt (siehe DECISIONS.md #33) — ein echter, nicht zusammengesetzter Viewport-Screenshot an
+    derselben Scroll-Position zeigt keinerlei Überlappung. Kein Fix nötig, nur protokolliert.

@@ -1,10 +1,16 @@
 import { defineConfig, devices } from '@playwright/test'
 
 /**
- * Read environment variables from file.
+ * Read environment variables from file. Explizit `.env.local`, da `dotenv/config` ohne Pfadangabe
+ * nur `.env` lädt (gibt es in diesem Projekt nicht, siehe DECISIONS.md) — ohne diesen Fix fehlten
+ * Payload-Local-API-Aufrufen aus E2E-Tests heraus PAYLOAD_SECRET/DATABASE_URL (derselbe Fix wie
+ * in `vitest.setup.ts`; der `pnpm dev`-Webserver selbst ist davon nicht betroffen, da Next.js
+ * `.env.local` ohnehin automatisch lädt).
  * https://github.com/motdotla/dotenv
  */
-import 'dotenv/config'
+import { config } from 'dotenv'
+
+config({ path: '.env.local' })
 
 /**
  * See https://playwright.dev/docs/test-configuration.

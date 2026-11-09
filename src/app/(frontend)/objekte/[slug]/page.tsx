@@ -9,10 +9,11 @@ import { LazyPropertyMap } from '@/components/properties/LazyPropertyMap'
 import { ShareButton } from '@/components/properties/ShareButton'
 import { Prose } from '@/components/ui/Prose'
 import { TeamMember } from '@/components/team/TeamMember'
-import { FormShapeFooter, SelectField, TextField, TextareaField } from '@/components/forms/FieldShape'
 import { formatCHF, formatFlaeche, formatOrt, formatZimmer } from '@/lib/format'
 import { propertyLocation } from '@/lib/property-location'
 import { getPayloadClient } from '@/lib/payload'
+
+import { BesichtigungForm } from './BesichtigungForm'
 
 export const revalidate = 86400
 
@@ -292,29 +293,8 @@ export default async function ObjektDetailPage({ params }: { params: Promise<{ s
       <section id="besichtigung" className="border-t border-sandstein/30 py-14 md:py-20 print:hidden">
         <Container>
           <h2 className="nora-h2">Besichtigung anfragen</h2>
-          <div className="nora-grid mt-6 max-w-3xl gap-y-5">
-            <div className="col-span-12 md:col-span-6">
-              <TextField label="Name" />
-            </div>
-            <div className="col-span-12 md:col-span-6">
-              <TextField label="Telefon" type="tel" />
-            </div>
-            <div className="col-span-12 md:col-span-6">
-              <TextField label="E-Mail" type="email" />
-            </div>
-            <div className="col-span-12 md:col-span-6">
-              <SelectField label="Anzahl Personen" options={['1', '2', '3', '4+']} />
-            </div>
-            <div className="col-span-12 md:col-span-6">
-              <TextField label="Wunschtermin 1" type="datetime-local" />
-            </div>
-            <div className="col-span-12 md:col-span-6">
-              <TextField label="Wunschtermin 2" type="datetime-local" />
-            </div>
-            <div className="col-span-12">
-              <TextareaField label="Nachricht" />
-            </div>
-            <FormShapeFooter />
+          <div className="mt-6">
+            <BesichtigungForm propertySlug={property.slug ?? ''} />
           </div>
         </Container>
       </section>
