@@ -1,67 +1,72 @@
-# Payload Blank Template
+# Nora Immobilien AG — Website & Backend
 
-This template comes configured with the bare minimum to get started on anything you need.
+Konzept-Vorschau für die Nora Immobilien AG (Zürich), gebaut für Axion. Next.js 16 (App Router) mit
+Payload CMS 3 im selben Projekt, Postgres-Backend, in Demo-Modus auf Vercel deploybar und ohne Neubau
+auf echten Go-live umstellbar (siehe [`GO_LIVE.md`](./GO_LIVE.md)).
 
-## Quick start
+**Lies zuerst, bevor du am Code arbeitest:** [`DESIGN.md`](./DESIGN.md) (Gestaltungsentscheidungen),
+[`DECISIONS.md`](./DECISIONS.md) (laufender Entscheidungs-Log, jede Phase), [`CONTENT_TODO.md`](./CONTENT_TODO.md)
+(offene Fragen an den Kunden), [`UMSETZUNGSPLAN.md`](./UMSETZUNGSPLAN.md) (Phasenplan).
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+## Tech-Stack
 
-## Quick Start - local setup
+Next.js 16 (App Router, TypeScript strict) · Payload CMS 3 (Postgres-Adapter, Lexical) · Tailwind CSS v4
+· Postgres (Neon in Produktion, lokaler Postgres in der Entwicklung — siehe `DECISIONS.md` #12) ·
+React Hook Form + Zod · Resend + React Email · Cloudflare Turnstile · Upstash Ratelimit (In-Memory-Fallback
+in der Entwicklung) · MapLibre GL + swisstopo · next-intl (Deutsch ohne Präfix, Englisch unter `/en`,
+aktuell nur Startseite + Bewirtschaftung, siehe `DECISIONS.md` #50) · Vitest, Playwright, axe-core,
+Lighthouse CI.
 
-To spin up this template locally, follow these steps:
+## Lokale Entwicklung
 
-### Clone
+Voraussetzungen: Node ≥22.23.4, pnpm, ein lokaler PostgreSQL-16-Server.
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+```bash
+createuser nora
+createdb nora_dev -O nora
+cp .env.example .env.local
+```
 
-### Development
+Trage in `.env.local` mindestens `DATABASE_URL` (lokaler Postgres), `PAYLOAD_SECRET` (beliebiger
+Zufallsstring), `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD` ein. Alles andere kann für die lokale
+Entwicklung leer bleiben — siehe die Kommentare in `.env.example` für Details zu jeder Variable.
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+```bash
+pnpm install
+pnpm seed          # füllt Team, Leistungen, Beispielobjekte, siteSettings, Rechtstext-Entwürfe
+pnpm dev           # http://localhost:3000, Admin unter /admin
+```
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+## Checkpoint (vor jedem Commit/jeder Phase)
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+```bash
+pnpm typecheck && pnpm lint && pnpm build
+```
 
-#### Docker (Optional)
+Für Formulare/Zugriffskontrolle zusätzlich:
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+```bash
+pnpm verify:access-control   # beweist: submissions/searchAlerts/users ohne Login nicht erreichbar
+pnpm test                    # Vitest (test:int) + Playwright (test:e2e)
+```
 
-To do so, follow these steps:
+## Projektstruktur
 
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+```
+src/
+  app/(frontend)/      öffentliche Next.js-Seiten (App Router)
+  app/(payload)/       Payload-Admin + API-Routen
+  app/en/              englische Seiten (nur Startseite + Bewirtschaftung, siehe DECISIONS.md #50)
+  collections/         Payload-Collections (properties, services, team, submissions, …)
+  globals/             Payload-Globals (siteSettings, home, about, tenantService, legal)
+  components/          UI-Komponenten, inkl. components/drawings/ (Zeichnungsmodul)
+  lib/                 Formular-Logik, E-Mail, Geokodierung, SEO-Helfer, Suchabo-Matching
+reference/             Archiv der alten Website (Phase 0), nicht Teil der Laufzeit-App
+scripts/               Seed- und Verify-Skripte
+```
 
-## How it works
+## Demo- vs. Produktionsmodus
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
-
-### Collections
-
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
-
-- #### Users (Authentication)
-
-  Users are auth-enabled collections that have access to the admin panel.
-
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/3.x/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
-
-- #### Media
-
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
-
-### Docker
-
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
-
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
-
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
-
-## Questions
-
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+`NEXT_PUBLIC_DEMO_MODE=true` (Vorschau-Link für den Kunden): Banner, dreifaches `noindex`, alle E-Mails
+gehen nur an `DEMO_RECIPIENT`, Turnstile-Testschlüssel, Beispielobjekte mit Badge. `false`: alles
+umgekehrt — siehe Briefing-Abschnitt 13 und [`GO_LIVE.md`](./GO_LIVE.md) für den vollständigen Umstieg.
