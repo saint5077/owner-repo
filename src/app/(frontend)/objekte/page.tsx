@@ -85,6 +85,13 @@ export default async function ObjektePage({ searchParams }: { searchParams: Prom
             </div>
           ) : (
             <div className="nora-grid gap-y-10">
+              {/* `PropertyCard` setzt bewusst ein `<h3>` (korrekt verschachtelt unter dem echten
+                  `<h2>Aktuelle Objekte</h2>` auf der Startseite) — hier auf /objekte folgt die
+                  Karten-Überschrift sonst direkt auf das `<h1>`, ohne h2 dazwischen (axe-core
+                  heading-order, Phase 8). Eine visuell verborgene h2 stellt die korrekte
+                  Hierarchie her, ohne `PropertyCard` für den anderen, bereits korrekten
+                  Verwendungsort auf der Startseite zu verändern. */}
+              <h2 className="sr-only">Suchergebnisse</h2>
               {objekte.map((property) => (
                 <div key={property.id} className="col-span-12 sm:col-span-6 lg:col-span-4">
                   <PropertyCard property={property} />

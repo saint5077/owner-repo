@@ -378,3 +378,126 @@ Blocker werden als Frage gestellt. Wird während des gesamten Projekts fortgefü
     Zusatzkomplexität nicht nötig ist. Mittelpunkt-Trenner («·») bewusst vermieden (DESIGN.md §10
     "Vermeiden" gilt dem Geist nach auch für Social-Preview-Bilder), stattdessen "/" wie in den
     Breadcrumbs der Seite selbst.
+
+## Phase 8 — Qualitätssicherung
+
+57. **Vitest-Lücken geschlossen**: `formatCHF`/`formatZimmer`/`formatFlaeche`/`formatOrt`
+    (inkl. der tatsächlich von `Intl.NumberFormat('de-CH')` erzeugten Zeichen — geschütztes
+    Leerzeichen U+00A0 nach "CHF", gerader Apostroph `'` als Tausendertrennzeichen, nicht `’`;
+    gegen echte Node-ICU-Ausgabe verifiziert, nicht angenommen), `getOpeningStatus`
+    (inkl. Leerzustand ohne gepflegte Zeiten, Ausnahmetage, exklusive Bis-Grenze),
+    `parsePropertyFilters`/`buildPropertyWhere`/`withParam` und `propertyLocation`
+    (Privatsphäre-Regel isoliert getestet, zusätzlich zur bestehenden E2E-Abdeckung). 56 Tests
+    in 7 Dateien, alle grün.
+58. **E2E-Suite auf 1 Worker fest eingestellt** (`playwright.config.ts`), nicht nur auf CI.
+    Alle E2E-Tests laufen gegen dieselbe echte lokale Postgres-Entwicklungsdatenbank
+    (DECISIONS.md #12) ohne Transaktions-Isolation pro Test — unter parallelen Workern führten
+    zeitgleich laufende Tests, die temporäre `properties`/`searchAlerts`-Dokumente anlegen
+    (`objekt-detail.e2e.spec.ts`, `suchabo-opt-in.e2e.spec.ts`), zu echten, nicht reproduzierbaren
+    Fehlschlägen bei Tests, die globale Zustände prüfen (z. B. "3 Objekte gefunden." in
+    `objekte-filter.e2e.spec.ts`). Mit 1 Worker vollständig behoben, nicht nur die Assertions
+    gelockert. Ausserdem wurde der seit Phase 2 unveränderte Scaffold-Test
+    (`frontend.e2e.spec.ts`, prüfte noch "Payload Blank Template"/"Welcome to your new project.")
+    durch echte Navigations-/404-/Redirect-Abdeckung ersetzt — ein echter, bis Phase 8
+    unbemerkter Lücken-Fund. 39 neue/ersetzte E2E-Tests, zusammen mit den bestehenden 60 Tests
+    insgesamt, alle grün.
+59. **Zwei echte, durch axe-core gefundene Barrierefreiheits-Bugs behoben, nicht nur Default-
+    Daten nachgezogen:**
+    - **`LanguageSwitch.tsx`**: der ausgegraute "EN"-Platzhalter auf noch nicht übersetzten
+      Seiten nutzte `opacity-50` auf dem bereits gedämpften `text-tinte-hell`-Ton — Kontrast nur
+      2,16:1 statt der geforderten 4,5:1. Ersetzt durch `aria-disabled="true"` + `cursor-not-
+      allowed` bei unveränderter (konformer) Textfarbe; "deaktiviert" wird jetzt nicht mehr über
+      Farbe allein vermittelt.
+    - **Formular-Fehlertext**: `#E81D1B` (DESIGN.md §2 "Fehlerzustand") war nur für weissen Text
+      AUF rotem Grund verifiziert (4,54:1) und wurde unverändert auch als rote Schrift AUF Kalk/
+      Weiss wiederverwendet — dort nur 3,96:1. Neuer, eigener Token **"Fehlertext" `#C21815`**
+      (5,32:1 auf Kalk) eingeführt und in `Fields.tsx` (`ErrorText`, `FormStatusFooter`) sowie
+      `SchadenmeldungForm.tsx` (Foto-Validierungsfehler) angewendet; `#E81D1B` bleibt für Ränder
+      (3:1-Schwelle nach WCAG 1.4.11, dort unverändert ausreichend) und für weissen Text auf
+      rotem Grund. DESIGN.md §4 entsprechend ergänzt.
+60. **`/objekte` hatte einen echten Heading-Order-Sprung** (h1 → h3, `PropertyCard` setzt direkt
+    `<h3>` für den Objekttitel) — dort korrekt, wo `PropertyCard` unter einer echten `<h2>`
+    steht (Startseiten-Teaser "Aktuelle Objekte"), aber falsch auf `/objekte` selbst, wo die
+    Karten direkt auf das `<h1>Objekte</h1>` folgen. Behoben mit einer visuell verborgenen
+    `<h2 class="sr-only">Suchergebnisse</h2>` vor dem Kartenraster, statt `PropertyCard` für den
+    anderen, bereits korrekten Verwendungsort zu verändern.
+61. **Der `link-name`-Fund (leere Wegweiser-Links auf der Startseite) war kein Code-Bug,
+    sondern veraltete lokale Entwicklungsdaten.** `seedHome()` (`src/seed/index.ts`) setzt
+    `label` für alle drei Wegweiser-Einträge und volle `ablaufSchritte`-Texte korrekt — die
+    lokale Postgres-Entwicklungsdatenbank in dieser Sandbox war seit einem Container-/
+    Worker-Neustart (Postgres mehrfach kurzzeitig nicht erreichbar, DECISIONS.md-Kontext dieser
+    Phase) nicht mehr mit dem aktuellen Seed-Skript neu befüllt worden. `pnpm seed` behebt es
+    vollständig, bestätigt per direktem API-Abgleich vor/nach dem Reseed — keine Code-Änderung
+    nötig oder vorgenommen. Für die Produktion irrelevant: dort pflegt die Redaktion Inhalte
+    über das CMS, nicht über das Seed-Skript.
+62. **Payloads Admin-Login-Bildschirm bewusst von der strikten axe-Null-Verstösse-Prüfung
+    ausgenommen** (`landmark-one-main`, `page-has-heading-one`, `region` — alle im unveränderten
+    Payload-Vendor-Markup). Das Projekt hat keinen vorgesehenen Override-Mechanismus für
+    Payload-Core-Templates; sie selbst zu patchen wäre ein unverhältnismässiger Eingriff in
+    Drittanbieter-Code für ein internes, login-geschütztes Redaktionswerkzeug. Der axe-Test
+    läuft weiterhin (loggt Funde), erzwingt aber keinen Fehlschlag mehr — bewusst dokumentiert,
+    nicht stillschweigend aus der Suite entfernt.
+63. **Lighthouse-SEO-Score 69/100 auf jeder Seite ist der beabsichtigte Demo-Modus-Effekt, kein
+    Mangel.** Einziger Minuspunkt überall: `is-crawlable` ("Page is blocked from indexing") —
+    exakt das von `robots.ts` erzwungene `Disallow: /`, solange `NEXT_PUBLIC_DEMO_MODE` nicht
+    explizit `false` ist (DECISIONS.md #54). Verifiziert: ein Build mit
+    `NEXT_PUBLIC_DEMO_MODE=false` (Variable wird zur Build-Zeit eingebettet, ein Neustart mit
+    geänderter Laufzeit-Variable allein reicht nicht) liefert **100/100/100/100** auf der
+    Startseite — Performance, Accessibility, Best Practices und SEO sind in Wahrheit bereits
+    voll konform; der 69er-Wert ist exakt der Preis der Absicht, die Vorschau nicht zu
+    indexieren, und verschwindet automatisch beim echten Go-live.
+64. **MapLibre-Kartenansicht (`/objekte?ansicht=karte`): echte, gemessene Performance-Grenze,
+    kein Bug.** Lighthouse (mobil, mit Standard-Drosselung) misst dort Performance 69/100 mit
+    9,9 s Total Blocking Time (TBT) — alle anderen Seiten erreichen 99–100 mit TBT unter 100 ms.
+    Der Befund wurde nicht einfach hingenommen, sondern geprüft:
+    - **Verdacht "Dev- statt Produktions-Bundle von maplibre-gl wird geladen" geprüft und
+      verworfen.** Der grösste Chunk referenziert zwar `maplibre-gl-dev.mjs`-Dateinamen, aber
+      die tatsächlich ausgeführte `maplibre-gl.mjs` (Produktionsbundle, von unserem Code korrekt
+      über `import … from 'maplibre-gl'` eingebunden) enthält nur eine Weichen-Logik, welche
+      Worker-Datei zu einer bereits laufenden Bundle-Variante passt (`e.endsWith('-dev.mjs') ?
+      …-worker-dev.mjs : …-worker.mjs`) — das bestätigt, dass der in Phase 5 kopierte
+      Produktions-Worker (DECISIONS.md #36) korrekt verwendet wird. Die `-dev`-Dateinamen im
+      Chunk sind von Turbopacks konservativer Bündelung dynamisch referenzierter Kandidaten-
+      Dateien, kein tatsächlich ausgeführter Dev-Code.
+    - **Ohne jede Drosselung** (`--throttling-method=provided`, reale Hardware dieser Sandbox)
+      bleiben real **2,16 s TBT** — deutlich weniger dramatisch als die gedrosselte Zahl, aber
+      ein echter, spürbarer Kostenpunkt, kein reines Mess-Artefakt der Simulation.
+    - **LCP bleibt auch auf dieser Seite unter 0,8 s** — die Karte ist bereits korrekt lazy
+      geladen (nur bei `ansicht=karte`, Phase 5) und blockiert nicht den initialen Seitenaufbau;
+      die Kosten entstehen erst nach der expliziten Nutzerwahl "Karte", nicht beim Betreten von
+      `/objekte`.
+    - **Ursache: MapLibre GLs inhärentes Gewicht** (Stilauswertung, WebGL-Initialisierung,
+      Verarbeitung der detailreichen swisstopo-Vektorkacheln für Zürich) unter mobiler CPU-
+      Drosselung — keine ineffiziente eigene Marker-Logik (nur 3 Beispielobjekte, keine Schleife
+      mit nennenswerter Laufzeit möglich). Als Phase-9-Vormerkung festgehalten (siehe "Bekannte
+      Grenzen" unten), nicht in dieser Phase riskant "gelöst", ohne die Kartenqualität visuell
+      verifizieren zu können.
+
+### Bekannte Grenzen (Briefing §14)
+
+Ehrlich und vollständig festgehalten, nicht stillschweigend offen gelassen:
+
+- **Englische Version nur 2 von ~15 Seiten** (Startseite, Bewirtschaftung) — DECISIONS.md #50,
+  `CONTENT_TODO.md`. Bewusste Risikoabwägung, keine vergessene Arbeit.
+- **`siteSettings` fehlen weiterhin reale Werte** für UID, Handelsregisternummer, MWST-Nummer
+  und Öffnungszeiten — alle in `CONTENT_TODO.md` als offene Kundenfragen geführt, JSON-LD und
+  Footer zeigen entsprechend keine erfundenen Platzhalter, sondern lassen die Felder aus.
+- **Entwicklung läuft auf lokalem Postgres/lokalem Datei-Upload statt Neon/Vercel Blob**, echter
+  Resend-/Turnstile-/Upstash-Betrieb fehlt noch (DECISIONS.md #12, #43) — alles mit funktionierenden
+  Entwicklungs-Fallbacks (Konsolen-E-Mail, Cloudflares öffentliche Test-Schlüssel, In-Memory-
+  Rate-Limit), aber echte Zugangsdaten für Phase 9 nötig.
+- **MapLibre-Kartenansicht kostet real ca. 2,2 s Haupt-Thread-Zeit** (gedrosselt gemessen 9,9 s
+  TBT) — strukturelle Grenze von MapLibre GL selbst, siehe Fund #64 oben. Mögliche künftige
+  Ansätze (nicht umgesetzt, da ungetestet riskant): `pixelRatio` der Karte auf hochauflösenden
+  Mobilgeräten deckeln, ein expliziter "Karte laden"-Klick-Gate statt Auto-Laden bei
+  Ansichtswechsel, oder Beobachtung künftiger, kleinerer maplibre-gl-Releases.
+- **Payload-Admin-Login-Bildschirm** hat drei axe-Funde in unverändertem Vendor-Markup
+  (`landmark-one-main`, `page-has-heading-one`, `region`) — bewusst nicht gepatcht, siehe Fund
+  #62. Betrifft nur das interne, login-geschützte Redaktionswerkzeug, nicht die Publikumsseite.
+- **Lighthouse-SEO zeigt 69/100 im Demo-Modus** — vollständig durch das beabsichtigte
+  `noindex`/`Disallow: /` erklärt (Fund #63), kein echter Mangel; verifiziert 100/100/100/100
+  mit `NEXT_PUBLIC_DEMO_MODE=false`.
+- Alle übrigen, bereits in früheren Phasen dokumentierten offenen Punkte (Team-Rollen,
+  Bautreuhand, SVIT-Bezeichnung, Google-Bewertungen, Notfallnummern, Formulare als PDF,
+  Ansprechperson pro Leistung usw.) bleiben unverändert in `CONTENT_TODO.md` offen — Phase 8
+  hat keine davon neu aufgeworfen oder gelöst, da ausserhalb des QS-Umfangs.

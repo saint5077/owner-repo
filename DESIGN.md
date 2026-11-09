@@ -67,7 +67,8 @@ Logo vorbehalten (plus dem oben genannten Fehlerzustands-Fallback `#E81D1B`).
 | Fensterlicht | `#F2C46D` | nur beleuchtete Fenster im Hero |
 | Weiss | `#FFFFFF` | Eingabefelder, Bildflächen |
 | Logo-Rot (exklusiv Logo) | `#E92624` | nur im Logo selbst |
-| Fehlerzustand (falls Rot als Fläche nötig) | `#E81D1B` | z. B. Formularfehler-Hintergrund, nie im Logo |
+| Fehlerzustand (Fläche/Rand) | `#E81D1B` | Formularfehler-Rand (3,96:1, erfüllt WCAG 1.4.11 ≥3:1), weisser Text AUF rotem Grund — nie als Textfarbe auf hellem Grund, nie im Logo |
+| Fehlertext | `#C21815` | Fehlermeldungstext auf Kalk/Weiss (5,32:1, erfüllt WCAG AA ≥4,5:1 für Fliesstext) — `#E81D1B` selbst reicht dafür nicht (nur 3,96:1, axe-core-Fund Phase 8) |
 
 Kein Dark Mode (bewusste Entscheidung, wie im Briefing).
 

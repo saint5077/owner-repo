@@ -21,8 +21,16 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  /**
+   * Immer 1 Worker, nicht nur auf CI. Alle E2E-Tests laufen gegen dieselbe echte lokale
+   * Postgres-Entwicklungsdatenbank (DECISIONS.md #12) — es gibt keine Transaktions-Isolation
+   * pro Test. Tests, die auf globale Zustände prüfen (z. B. "3 Objekte gefunden." in
+   * objekte-filter.e2e.spec.ts), würden unter parallelen Workern durch zeitgleich laufende
+   * Tests, die temporäre `properties`/`searchAlerts`-Dokumente anlegen (objekt-detail.e2e.spec.ts,
+   * suchabo-opt-in.e2e.spec.ts), zufällig fehlschlagen — genau das in Phase 8 beobachtet und
+   * hier behoben, statt die Assertions unzuverlässig zu lockern.
+   */
+  workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */

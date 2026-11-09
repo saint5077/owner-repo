@@ -31,7 +31,12 @@ export function LanguageSwitch() {
           EN
         </Link>
       ) : (
-        <span className="opacity-50" title="Für diese Seite noch keine englische Version.">
+        // `opacity-50` schwächte den ohnehin schon gedämpften `text-tinte-hell`-Ton (vom
+        // übergeordneten div geerbt) auf einen Kontrast von 2.16:1 ab — unter der WCAG-AA-
+        // Schwelle von 4.5:1 (axe-core, Phase 8). "Deaktiviert" wird jetzt über `cursor-not-
+        // allowed` und `aria-disabled` statt über Farbe vermittelt; die Textfarbe bleibt beim
+        // bereits konformen `text-tinte-hell` (~6:1 auf Kalk, DESIGN.md §4).
+        <span aria-disabled="true" className="cursor-not-allowed" title="Für diese Seite noch keine englische Version.">
           EN
         </span>
       )}

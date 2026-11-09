@@ -1,7 +1,14 @@
 'use client'
 
 const fieldClass = 'nora-prose w-full border border-sandstein/50 bg-weiss px-4 py-3 text-[16px]'
+// Grenzlinie: #E81D1B (DESIGN.md §2 "Fehlerzustand") reicht hier, da Rand-Kontrast nur 3:1
+// gegen den Hintergrund braucht (WCAG 1.4.11) und #E81D1B das mit 3.96:1 erfüllt.
 const errorClass = 'border-[#E81D1B]'
+// Fehler-TEXT braucht dagegen 4.5:1 (normaler Fliesstext) — #E81D1B wurde nur für weissen Text
+// AUF rotem Grund verifiziert (4.54:1, DESIGN.md §2), nicht für rote Schrift auf hellem Grund
+// (nur 3.96:1 dort, axe-core color-contrast, Phase 8). #C21815 erreicht 5.32:1 bei gleicher
+// Farbfamilie — siehe DESIGN.md §4 "Fehlertext".
+export const errorTextClass = 'text-[#C21815]'
 
 // RHF liefert je nach Feldform `FieldError` oder `Merge<FieldError, FieldErrorsImpl<...>>` —
 // beide haben ein optionales `message`, mehr wird hier nicht gebraucht; ein eigener, loser Typ
@@ -11,7 +18,7 @@ type DisplayableError = { message?: string } | undefined
 function ErrorText({ error }: { error?: DisplayableError }) {
   if (!error) return null
   return (
-    <p role="alert" className="nora-prose mt-1.5 text-[13px] text-[#E81D1B]">
+    <p role="alert" className={`nora-prose mt-1.5 text-[13px] ${errorTextClass}`}>
       {error.message}
     </p>
   )
@@ -142,7 +149,7 @@ export function FormStatusFooter({
         </p>
       ) : null}
       {error ? (
-        <p role="alert" className="nora-prose text-[14px] text-[#E81D1B]">
+        <p role="alert" className={`nora-prose text-[14px] ${errorTextClass}`}>
           {error}
         </p>
       ) : null}

@@ -8,7 +8,7 @@ import type { z } from 'zod'
 import type { TenantService } from '@/payload-types'
 import { DraftBox } from '@/components/ui/DraftNotice'
 import { Prose } from '@/components/ui/Prose'
-import { FormStatusFooter, HoneypotField, SelectField, TextField, TextareaField } from '@/components/forms/Fields'
+import { FormStatusFooter, HoneypotField, SelectField, TextField, TextareaField, errorTextClass } from '@/components/forms/Fields'
 import { Turnstile } from '@/components/forms/Turnstile'
 import { downscaleImage } from '@/lib/uploads/downscale'
 import { schadenmeldungSchema, type SchadenmeldungInput } from '@/lib/forms/schemas'
@@ -211,7 +211,7 @@ export function SchadenmeldungForm({
                 className="nora-prose w-full border border-sandstein/50 bg-weiss px-4 py-3 text-[15px]"
               />
             </label>
-            {errors.fotoKeys ? <p className="nora-prose mt-1.5 text-[13px] text-[#E81D1B]">{errors.fotoKeys.message}</p> : null}
+            {errors.fotoKeys ? <p className={`nora-prose mt-1.5 text-[13px] ${errorTextClass}`}>{errors.fotoKeys.message}</p> : null}
             {fotos.length > 0 ? (
               <ul className="mt-4 flex flex-col gap-2">
                 {fotos.map((f) => (
