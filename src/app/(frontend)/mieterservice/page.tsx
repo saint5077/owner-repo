@@ -4,10 +4,15 @@ import { Container } from '@/components/layout/Container'
 import { Prose } from '@/components/ui/Prose'
 import { DraftBox, DraftNotice } from '@/components/ui/DraftNotice'
 import { getPayloadClient } from '@/lib/payload'
+import { pageMetadata } from '@/lib/seo'
 
 export const revalidate = 86400
 
-export const metadata = { title: 'Mieterservice — Nora Immobilien AG' }
+export const metadata = pageMetadata({
+  title: 'Mieterservice',
+  description: 'Schaden melden, Notfall-Hinweise und Formulare für die Mieterschaft von Nora Immobilien.',
+  dePath: '/mieterservice',
+})
 
 export default async function MieterservicePage() {
   const payload = await getPayloadClient()

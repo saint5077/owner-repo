@@ -60,6 +60,16 @@ Abschnitt 16.
 - [ ] Aufbewahrungsfrist für Anfragen/Anhänge — Standard 12 Monate als Default implementiert, bitte
       bestätigen oder korrigieren.
 
+## Englische Version
+
+- [ ] Nur Startseite und Bewirtschaftung sind bisher übersetzt (`/en`, `/en/bewirtschaftung`) —
+      siehe DECISIONS.md #50/#51. Die übrigen Seiten (Stockwerkeigentum, Erstvermietung, Verkauf,
+      Objekte, Mieterservice, Über uns, Kontakt, Impressum, Datenschutz) brauchen noch eine englische
+      Fassung, bevor die Sprachwahl dort sinnvoll verlinken kann.
+- [ ] Die vorhandenen zwei englischen Seiten sind von uns übersetzt, nicht von einer
+      Muttersprachlerin/einem Muttersprachler gegengelesen — vor Go-live prüfen lassen (deutlicher
+      Hinweis dazu ist bereits auf jeder `/en`-Seite sichtbar).
+
 ## Prozesse / Sonstiges
 
 - [ ] Credit-Zeile "Website: Axion" im Footer — Formulierung/Verlinkung final abstimmen.

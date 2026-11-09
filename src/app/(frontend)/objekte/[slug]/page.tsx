@@ -11,6 +11,7 @@ import { Prose } from '@/components/ui/Prose'
 import { TeamMember } from '@/components/team/TeamMember'
 import { formatCHF, formatFlaeche, formatOrt, formatZimmer } from '@/lib/format'
 import { propertyLocation } from '@/lib/property-location'
+import { buildBreadcrumbJsonLd } from '@/lib/jsonld'
 import { getPayloadClient } from '@/lib/payload'
 
 import { BesichtigungForm } from './BesichtigungForm'
@@ -65,6 +66,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${property.title} — Nora Immobilien AG`,
     description: formatOrt(property.kreis, property.adresse?.ort),
+    alternates: { canonical: `/objekte/${slug}` },
   }
 }
 
@@ -144,6 +146,18 @@ export default async function ObjektDetailPage({ params }: { params: Promise<{ s
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildBreadcrumbJsonLd([
+              { name: 'Startseite', path: '/' },
+              { name: 'Objekte', path: '/objekte' },
+              { name: property.title ?? 'Objekt', path: `/objekte/${slug}` },
+            ]),
+          ),
+        }}
+      />
 
       <Container>
         <p className="nora-nav-label pt-6 text-tinte-hell print:hidden">

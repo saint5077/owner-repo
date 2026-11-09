@@ -7,8 +7,9 @@ import { Logo } from '@/components/branding/Logo'
 import { WOCHENTAG_LABEL } from '@/lib/wochentage'
 
 import { Container } from './Container'
+import { LanguageSwitch } from './LanguageSwitch'
 
-const NAV = [
+const NAV_DE = [
   { label: 'Bewirtschaftung', href: '/bewirtschaftung' },
   { label: 'Stockwerkeigentum', href: '/stockwerkeigentum' },
   { label: 'Erstvermietung', href: '/erstvermietung' },
@@ -18,10 +19,25 @@ const NAV = [
   { label: 'Über uns', href: '/ueber-uns' },
   { label: 'Kontakt', href: '/kontakt' },
 ]
+const NAV_EN = [
+  { label: 'Property Management', href: '/en/bewirtschaftung' },
+  { label: 'Condominium Management', href: '/stockwerkeigentum' },
+  { label: 'First Letting', href: '/erstvermietung' },
+  { label: 'Sale', href: '/verkauf' },
+  { label: 'Properties', href: '/objekte' },
+  { label: 'Tenant Service', href: '/mieterservice' },
+  { label: 'About Us', href: '/ueber-uns' },
+  { label: 'Contact', href: '/kontakt' },
+]
 
-type FooterProps = { siteSettings: SiteSetting | null }
+type FooterProps = { siteSettings: SiteSetting | null; locale?: 'de' | 'en' }
 
-export function Footer({ siteSettings }: FooterProps) {
+export function Footer({ siteSettings, locale = 'de' }: FooterProps) {
+  const NAV = locale === 'en' ? NAV_EN : NAV_DE
+  const t =
+    locale === 'en'
+      ? { nav: 'Footer navigation', legal: ['Imprint', 'Privacy Policy'], credit: 'Website: Axion' }
+      : { nav: 'Footer-Navigation', legal: ['Impressum', 'Datenschutz'], credit: 'Website: Axion' }
   const firma = siteSettings?.firma
   const adresse = firma?.adresse
   const geoeffneteTage = (siteSettings?.oeffnungszeiten?.regulaer ?? []).filter(
@@ -74,7 +90,7 @@ export function Footer({ siteSettings }: FooterProps) {
             ) : null}
           </div>
 
-          <nav aria-label="Footer-Navigation" className="col-span-6 md:col-span-4">
+          <nav aria-label={t.nav} className="col-span-6 md:col-span-4">
             <ul className="flex flex-col gap-2">
               {NAV.map((item) => (
                 <li key={item.href}>
@@ -99,25 +115,18 @@ export function Footer({ siteSettings }: FooterProps) {
 
             <div className="nora-nav-label flex items-center gap-4 text-tinte-hell">
               <Link href="/impressum" className="hover:text-fensterladen">
-                Impressum
+                {t.legal[0]}
               </Link>
               <Link href="/datenschutz" className="hover:text-fensterladen">
-                Datenschutz
+                {t.legal[1]}
               </Link>
             </div>
 
-            <div className="nora-nav-label flex items-center gap-3 text-tinte-hell">
-              <span aria-current="true" className="text-tinte">
-                DE
-              </span>
-              <span className="opacity-50" title="Englische Version folgt in Phase 7">
-                EN
-              </span>
-            </div>
+            <LanguageSwitch />
           </div>
         </div>
 
-        <p className="mt-16 text-[13px] text-tinte-hell">Website: Axion</p>
+        <p className="mt-16 text-[13px] text-tinte-hell">{t.credit}</p>
       </Container>
     </footer>
   )

@@ -2,7 +2,8 @@ import { Container } from '@/components/layout/Container'
 
 import { UnsubscribeButton } from './UnsubscribeButton'
 
-export const metadata = { title: 'Suchabo abmelden — Nora Immobilien AG' }
+// Token-tragende Transaktionsseite — nicht indexieren (Briefing: nichts Fremdes in der Suche).
+export const metadata = { title: 'Suchabo abmelden — Nora Immobilien AG', robots: { index: false, follow: false } }
 
 export default async function SuchaboAbmeldenPage({
   searchParams,

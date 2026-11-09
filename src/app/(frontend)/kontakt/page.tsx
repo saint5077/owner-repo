@@ -1,12 +1,17 @@
 import { Container } from '@/components/layout/Container'
 import { KontaktBlock } from '@/components/contact/KontaktBlock'
 import { getPayloadClient } from '@/lib/payload'
+import { pageMetadata } from '@/lib/seo'
 
 import { KontaktForm } from './KontaktForm'
 
 export const revalidate = 86400
 
-export const metadata = { title: 'Kontakt — Nora Immobilien AG' }
+export const metadata = pageMetadata({
+  title: 'Kontakt',
+  description: 'Kontaktieren Sie Nora Immobilien AG — Langstrasse 14, 8004 Zürich, +41 44 495 70 70.',
+  dePath: '/kontakt',
+})
 
 export default async function KontaktPage({
   searchParams,

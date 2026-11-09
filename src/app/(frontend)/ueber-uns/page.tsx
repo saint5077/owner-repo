@@ -5,10 +5,15 @@ import { TeamMember } from '@/components/team/TeamMember'
 import { Prose } from '@/components/ui/Prose'
 import { getPayloadClient } from '@/lib/payload'
 import { getJahreSeitGruendung } from '@/lib/years'
+import { pageMetadata } from '@/lib/seo'
 
 export const revalidate = 86400
 
-export const metadata = { title: 'Über uns — Nora Immobilien AG' }
+export const metadata = pageMetadata({
+  title: 'Über uns',
+  description: 'Nora Immobilien AG — seit 1979 ein kleines, unabhängiges Team in Privatbesitz, Mitglied SVIT und FIABCI.',
+  dePath: '/ueber-uns',
+})
 
 export default async function UeberUnsPage() {
   const payload = await getPayloadClient()

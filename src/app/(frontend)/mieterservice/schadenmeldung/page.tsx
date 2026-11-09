@@ -2,12 +2,17 @@ import Link from 'next/link'
 
 import { Container } from '@/components/layout/Container'
 import { getPayloadClient } from '@/lib/payload'
+import { pageMetadata } from '@/lib/seo'
 
 import { SchadenmeldungForm } from './SchadenmeldungForm'
 
 export const revalidate = 86400
 
-export const metadata = { title: 'Schaden melden — Nora Immobilien AG' }
+export const metadata = pageMetadata({
+  title: 'Schaden melden',
+  description: 'Schaden an Ihrer Mietwohnung melden — Mieterservice der Nora Immobilien AG.',
+  dePath: '/mieterservice/schadenmeldung',
+})
 
 export default async function SchadenmeldungPage() {
   const payload = await getPayloadClient()

@@ -1,9 +1,14 @@
 import { Container } from '@/components/layout/Container'
 import { LeererGrundriss } from '@/components/drawings'
+import { pageMetadata } from '@/lib/seo'
 
 import { SuchaboForm } from './SuchaboForm'
 
-export const metadata = { title: 'Suchabo — Nora Immobilien AG' }
+export const metadata = pageMetadata({
+  title: 'Suchabo',
+  description: 'Suchabo einrichten — wir informieren Sie, sobald eine passende Immobilie frei wird.',
+  dePath: '/suchabo',
+})
 
 /**
  * Feld-Optik wie die übrigen Formulare dieser Phase (DECISIONS.md #32) — Double-Opt-in,

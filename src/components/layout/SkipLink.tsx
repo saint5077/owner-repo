@@ -1,7 +1,7 @@
-export function SkipLink() {
+export function SkipLink({ locale = 'de' }: { locale?: 'de' | 'en' }) {
   return (
     <a href="#hauptinhalt" className="nora-skip-link">
-      Zum Hauptinhalt springen
+      {locale === 'en' ? 'Skip to main content' : 'Zum Hauptinhalt springen'}
     </a>
   )
 }

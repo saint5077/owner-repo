@@ -2,10 +2,15 @@ import { Container } from '@/components/layout/Container'
 import { DraftNotice } from '@/components/ui/DraftNotice'
 import { Prose } from '@/components/ui/Prose'
 import { getPayloadClient } from '@/lib/payload'
+import { pageMetadata } from '@/lib/seo'
 
 export const revalidate = 86400
 
-export const metadata = { title: 'Impressum — Nora Immobilien AG' }
+export const metadata = pageMetadata({
+  title: 'Impressum',
+  description: 'Impressum der Nora Immobilien AG, Langstrasse 14, 8004 Zürich.',
+  dePath: '/impressum',
+})
 
 export default async function ImpressumPage() {
   const payload = await getPayloadClient()

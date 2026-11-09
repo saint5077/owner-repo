@@ -2,7 +2,8 @@ import { Container } from '@/components/layout/Container'
 
 import { ConfirmButton } from './ConfirmButton'
 
-export const metadata = { title: 'Suchabo bestätigen — Nora Immobilien AG' }
+// Token-tragende Transaktionsseite — nicht indexieren (Briefing: nichts Fremdes in der Suche).
+export const metadata = { title: 'Suchabo bestätigen — Nora Immobilien AG', robots: { index: false, follow: false } }
 
 export default async function SuchaboBestaetigenPage({
   searchParams,

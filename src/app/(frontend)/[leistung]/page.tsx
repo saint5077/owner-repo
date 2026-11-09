@@ -7,7 +7,10 @@ import { Einfamilienhaus, MFHAnsicht, NeubauBalkone, StockwerkSchnitt } from '@/
 import { DraftNotice } from '@/components/ui/DraftNotice'
 import { Prose } from '@/components/ui/Prose'
 import { TeamMember } from '@/components/team/TeamMember'
+import { JsonLd } from '@/components/seo/JsonLd'
+import { buildBreadcrumbJsonLd, buildServiceJsonLd } from '@/lib/jsonld'
 import { getPayloadClient } from '@/lib/payload'
+import { pageMetadata } from '@/lib/seo'
 
 import { LeistungForm } from './LeistungForm'
 
@@ -36,7 +39,13 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ leistung: string }> }) {
   const { leistung } = await params
   if (!isLeistung(leistung)) return {}
-  return { title: `${LABEL[leistung]} — Nora Immobilien AG` }
+  const service = await getService(leistung)
+  return pageMetadata({
+    title: LABEL[leistung],
+    description: service?.seo?.description ?? service?.claim,
+    dePath: `/${leistung}`,
+    enPath: leistung === 'bewirtschaftung' ? '/en/bewirtschaftung' : undefined,
+  })
 }
 
 async function getService(leistung: Service['serviceType']) {
@@ -62,6 +71,13 @@ export default async function LeistungPage({ params }: { params: Promise<{ leist
 
   return (
     <>
+      <JsonLd data={buildServiceJsonLd(service, `/${leistung}`)} />
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: 'Startseite', path: '/' },
+          { name: LABEL[leistung], path: `/${leistung}` },
+        ])}
+      />
       <Container>
         <section className="nora-grid items-center gap-y-10 py-10 md:py-16">
           <div className="col-span-12 md:col-span-6 md:pr-8">

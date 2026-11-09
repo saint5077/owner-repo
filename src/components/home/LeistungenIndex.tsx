@@ -15,8 +15,14 @@ const ROUTE: Record<Service['serviceType'], string> = {
   verkauf: '/verkauf',
 }
 
-const LABEL: Record<Service['serviceType'], string> = {
+const LABEL_DE: Record<Service['serviceType'], string> = {
   bewirtschaftung: 'Bewirtschaftung',
+  stockwerkeigentum: 'Stockwerkeigentum',
+  erstvermietung: 'Erstvermietung',
+  verkauf: 'Verkauf',
+}
+const LABEL_EN: Record<Service['serviceType'], string> = {
+  bewirtschaftung: 'Property Management',
   stockwerkeigentum: 'Stockwerkeigentum',
   erstvermietung: 'Erstvermietung',
   verkauf: 'Verkauf',
@@ -24,12 +30,19 @@ const LABEL: Record<Service['serviceType'], string> = {
 
 // Der Bewirtschaftungs-Claim steht bereits im Hero — hier stattdessen eine kurze sachliche
 // Beschreibung statt Wiederholung (Briefing §6.1.4).
-const BEWIRTSCHAFTUNG_BESCHREIBUNG = 'Vermietung, Unterhalt, Buchhaltung und Abrechnung aus einer Hand.'
+const BEWIRTSCHAFTUNG_BESCHREIBUNG_DE = 'Vermietung, Unterhalt, Buchhaltung und Abrechnung aus einer Hand.'
+const BEWIRTSCHAFTUNG_BESCHREIBUNG_EN = 'Letting, maintenance, bookkeeping and billing, all from one hand.'
 
-type Props = { services: Service[] }
+type Props = { services: Service[]; locale?: 'de' | 'en' }
 
-export function LeistungenIndex({ services }: Props) {
+export function LeistungenIndex({ services, locale = 'de' }: Props) {
   const [hovered, setHovered] = useState<Service['serviceType'] | null>(null)
+  const LABEL = locale === 'en' ? LABEL_EN : LABEL_DE
+  const bewirtschaftungBeschreibung = locale === 'en' ? BEWIRTSCHAFTUNG_BESCHREIBUNG_EN : BEWIRTSCHAFTUNG_BESCHREIBUNG_DE
+  const hoverHint =
+    locale === 'en'
+      ? 'Hover over a service to see its drawing. Only Property Management has an English page so far.'
+      : 'Zeigt beim Überfahren einer Leistung deren Zeichnung.'
 
   return (
     <div className="nora-grid items-start gap-y-6">
@@ -37,7 +50,7 @@ export function LeistungenIndex({ services }: Props) {
         {services.map((service) => (
           <li key={service.id} className="border-t border-sandstein/30 last:border-b">
             <Link
-              href={ROUTE[service.serviceType]}
+              href={locale === 'en' && service.serviceType === 'bewirtschaftung' ? '/en/bewirtschaftung' : ROUTE[service.serviceType]}
               className="group flex flex-col gap-1 py-5 md:flex-row md:items-baseline md:gap-6"
               onMouseEnter={() => setHovered(service.serviceType)}
               onMouseLeave={() => setHovered((v) => (v === service.serviceType ? null : v))}
@@ -46,7 +59,7 @@ export function LeistungenIndex({ services }: Props) {
             >
               <span className="nora-h3 shrink-0 group-hover:text-fensterladen">{LABEL[service.serviceType]}</span>
               <span className="nora-prose text-[16px] text-tinte-hell">
-                {service.serviceType === 'bewirtschaftung' ? BEWIRTSCHAFTUNG_BESCHREIBUNG : service.claim}
+                {service.serviceType === 'bewirtschaftung' ? bewirtschaftungBeschreibung : service.claim}
               </span>
             </Link>
           </li>
@@ -61,9 +74,7 @@ export function LeistungenIndex({ services }: Props) {
             return Drawing ? <Drawing className="h-full w-full text-tinte" /> : null
           })()
         ) : (
-          <p className="nora-prose text-center text-[15px] text-tinte-hell">
-            Zeigt beim Überfahren einer Leistung deren Zeichnung.
-          </p>
+          <p className="nora-prose text-center text-[15px] text-tinte-hell">{hoverHint}</p>
         )}
       </div>
     </div>

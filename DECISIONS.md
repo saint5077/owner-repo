@@ -319,3 +319,62 @@ Blocker werden als Frage gestellt. Wird während des gesamten Projekts fortgefü
     (`fullPage`-Screenshot nach Scroll zu `#besichtigung`) erneut als reines Stitching-Artefakt
     bestätigt (siehe DECISIONS.md #33) — ein echter, nicht zusammengesetzter Viewport-Screenshot an
     derselben Scroll-Position zeigt keinerlei Überlappung. Kein Fix nötig, nur protokolliert.
+
+## Phase 7 — SEO, Englisch, OG-Bilder, Redirects
+
+50. **`/en`-Umfang bewusst auf zwei Seiten begrenzt (Startseite, Bewirtschaftung).** Volle
+    next-intl-Routing-Migration (alle ~15 bestehenden Routen unter `app/[locale]/` verschieben,
+    Middleware, jeden internen Link anpassen) ist ein grosser, riskanter struktureller Umbau an
+    einem bereits funktionierenden, mehrfach verifizierten Seitenbaum (Phasen 3–6). Risikoabwägung:
+    lieber zwei Seiten sauber, ehrlich und vollständig übersetzt als ein Versuch, die ganze Seite in
+    einem Durchgang umzuziehen, der auf halbem Weg fehlschlagen und die bestehende deutsche Seite
+    mitbeschädigen könnte. Stattdessen: eigener `src/app/en/`-Baum (eigenes Root-Layout, kein
+    next-intl-Routing), der Header/Footer/MobileActionBar/LeistungenIndex wiederverwendet (jetzt mit
+    optionalem `locale`-Prop statt next-intl-Hooks — bei nur zwei Seiten wäre ein
+    Message-Katalog-System mehr Komplexität als die paar hartcodierten Strings direkt im Code, wie es
+    der Rest des Projekts ohnehin schon für Seiteninhalte macht). Jede englische Seite zeigt eine
+    `DraftBox` "translation in progress", die ehrlich sagt, dass nur diese zwei Seiten existieren.
+    Die Sprachwahl in Header/Footer (`LanguageSwitch.tsx`) verlinkt `EN` nur dort, wo eine Seite
+    tatsächlich existiert — sonst ausgegraut mit Erklärung, kein toter Link. Erweiterung auf weitere
+    Seiten bleibt in `CONTENT_TODO.md` vermerkt.
+51. **Echte Übersetzungen statt nur Fallback.** `localization.fallback: true` (Payload-Config)
+    würde ohnehin German zeigen, wenn kein Englisch gepflegt ist — technisch hätte `/en` also auch
+    ohne jede Übersetzungsarbeit "funktioniert" (nur eben auf Deutsch). Das wäre aber keine englische
+    Seite, nur eine deutsche Seite unter einer `/en`-URL. Stattdessen wurden die tatsächlich
+    sichtbaren Felder von Startseite und Bewirtschaftung (`services.claim`/`einleitung`/
+    `leistungsgruppen`, `home.heroLead`/`wegweiser`/`ablaufSchritte`) über ein eigenes Skript
+    (`scripts/seed-en.ts`, `pnpm seed:en`) mit von Hand verfassten, inhaltlich treuen Übersetzungen
+    des bereits bestätigten deutschen Texts gefüllt — keine neuen Fakten, nur Übersetzung. FAQ und die
+    übrigen drei Leistungen bleiben unübersetzt (fallen korrekt auf Deutsch zurück), weil sie ohnehin
+    als Entwurf gelten bzw. nicht zum Zwei-Seiten-Umfang gehören.
+52. **`FAQPage`-Strukturdaten bewusst nicht eingebaut**, obwohl Briefing/Umsetzungsplan sie nennen.
+    Die FAQ-Inhalte auf den Leistungsseiten sind durchgehend als Entwurf markiert
+    (`DraftNotice`, DECISIONS.md #29) — sie als `FAQPage`-JSON-LD auszuzeichnen hiesse, Google diese
+    unbestätigten Fragen/Antworten als geprüften Fakt zur Anzeige in den Suchergebnissen anzubieten.
+    Das widerspricht derselben "nichts erfinden, nichts als sicherer darstellen als es ist"-Regel,
+    die auch `siteSettings`/`llms.txt` befolgen. Sobald FAQ-Inhalte fachlich freigegeben sind
+    (`contentStatus`-artiger Mechanismus müsste dafür auf `faq` erweitert werden), ist das Nachrüsten
+    von `FAQPage`-JSON-LD eine kleine, isolierte Ergänzung.
+53. **`RealEstateAgent`-JSON-LD lässt unbestätigte Felder komplett weg** statt leere Strings oder
+    Platzhalter auszugeben (UID, Handelsregisternummer, Öffnungszeiten — alle noch offen laut
+    `CONTENT_TODO.md`). `openingHoursSpecification` entsprechend ganz ausgelassen, bis
+    `siteSettings.oeffnungszeiten` echte Werte hat.
+54. **`robots.ts` liest `NEXT_PUBLIC_DEMO_MODE` vorausschauend für Phase 9**, obwohl die Variable
+    (und das Demo-Banner, das sie sonst steuert) diese Phase noch gar nicht existiert. Fehlt die
+    Variable oder ist sie `"true"`, sperrt `robots.ts` alles (`Disallow: /`) — der aktuell korrekte
+    Zustand für eine Vorschau, die noch nicht live gehen soll. Erst ein explizites
+    `NEXT_PUBLIC_DEMO_MODE=false` beim echten Go-live schaltet die Seite für Suchmaschinen frei. So
+    muss Phase 9 diese Datei nicht mehr anfassen, nur die Variable setzen.
+55. **Redirects: keine weiteren nötig, mit dem Phase-0-Archiv verifiziert statt vermutet.**
+    `reference/original-site/pages-sitemap.xml` listet nur sechs URLs, die alle 1:1 auf identische
+    neue Pfade treffen (`/`, `/bewirtschaftung`, `/stockwerkeigentum`, `/erstvermietung`, `/verkauf`,
+    `/objekte` — URLs bleiben laut Briefing §4 bestehen). Die einzige tatsächlich nötige Umleitung
+    (`/rechtliche-hinweise` → `/impressum`, nicht in der Sitemap, nur im alten Footer verlinkt) existiert
+    bereits seit Phase 4. Statische `next.config.ts`-Redirects bleiben damit ausreichend — keine neue
+    CMS-Redirects-Collection nötig für den aktuellen Umfang.
+56. **OG-Bilder für Startseite und Leistungsseiten mit Systemschriften**, konsistent mit der
+    bestehenden Begründung für das Objekt-OG-Bild (Phase 5): `next/og`/Satori bräuchte eigene
+    Font-Dateien in der Edge-Umgebung, was für ein sauberes, markenkonformes sans-serif-Bild ohne
+    Zusatzkomplexität nicht nötig ist. Mittelpunkt-Trenner («·») bewusst vermieden (DESIGN.md §10
+    "Vermeiden" gilt dem Geist nach auch für Social-Preview-Bilder), stattdessen "/" wie in den
+    Breadcrumbs der Seite selbst.

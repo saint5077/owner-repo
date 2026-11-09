@@ -8,8 +8,13 @@ import { LazyPropertyMap } from '@/components/properties/LazyPropertyMap'
 import { propertyLocation } from '@/lib/property-location'
 import { buildPropertyWhere, parsePropertyFilters, sortParam } from '@/lib/property-filters'
 import { getPayloadClient } from '@/lib/payload'
+import { pageMetadata } from '@/lib/seo'
 
-export const metadata = { title: 'Objekte — Nora Immobilien AG' }
+export const metadata = pageMetadata({
+  title: 'Objekte',
+  description: 'Aktuelle Mietwohnungen und Kaufobjekte der Nora Immobilien AG in Zürich.',
+  dePath: '/objekte',
+})
 
 type SearchParams = Record<string, string | string[] | undefined>
 

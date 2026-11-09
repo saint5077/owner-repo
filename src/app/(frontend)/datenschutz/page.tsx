@@ -2,10 +2,15 @@ import { Container } from '@/components/layout/Container'
 import { DraftNotice } from '@/components/ui/DraftNotice'
 import { Prose } from '@/components/ui/Prose'
 import { getPayloadClient } from '@/lib/payload'
+import { pageMetadata } from '@/lib/seo'
 
 export const revalidate = 86400
 
-export const metadata = { title: 'Datenschutz — Nora Immobilien AG' }
+export const metadata = pageMetadata({
+  title: 'Datenschutz',
+  description: 'Datenschutzerklärung der Nora Immobilien AG nach Schweizer Recht (revDSG).',
+  dePath: '/datenschutz',
+})
 
 export default async function DatenschutzPage() {
   const payload = await getPayloadClient()
