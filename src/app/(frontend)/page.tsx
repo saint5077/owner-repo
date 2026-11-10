@@ -7,7 +7,6 @@ import { LeistungenIndex } from '@/components/home/LeistungenIndex'
 import { PropertyCard } from '@/components/properties/PropertyCard'
 import { TeamMember } from '@/components/team/TeamMember'
 import { KontaktBlock } from '@/components/contact/KontaktBlock'
-import { DraftNotice } from '@/components/ui/DraftNotice'
 import { getPayloadClient } from '@/lib/payload'
 import { getJahreSeitGruendung } from '@/lib/years'
 
@@ -128,24 +127,6 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      {home?.ablaufSchritte && home.ablaufSchritte.length > 0 ? (
-        <section className="border-t border-sandstein/30 py-14 md:py-20">
-          <Container>
-            <h2 className="nora-h2">So übernehmen wir Ihre Liegenschaft</h2>
-            <ol className="nora-grid mt-8 gap-y-8">
-              {home.ablaufSchritte.map((schritt, i) => (
-                <li key={schritt.id} className="col-span-12 md:col-span-3">
-                  <p className="nora-nav-label text-tinte-hell">{i + 1}</p>
-                  <p className="nora-h3 mt-1">{schritt.schritt}</p>
-                  <p className="nora-prose mt-2 text-[15px] text-tinte-hell">{schritt.beschreibung}</p>
-                </li>
-              ))}
-            </ol>
-            <DraftNotice>Entwurf — noch nicht vom Kunden bestätigt.</DraftNotice>
-          </Container>
-        </section>
-      ) : null}
-
       <section className="border-t border-sandstein/30 py-14 md:py-20">
         <Container>
           <div className="flex flex-wrap items-baseline justify-between gap-4">
@@ -171,27 +152,6 @@ export default async function HomePage() {
               — wir melden uns, sobald etwas Passendes frei wird.
             </p>
           )}
-        </Container>
-      </section>
-
-      <section className="border-t border-sandstein/30 py-14 md:py-20">
-        <Container>
-          <div className="nora-grid items-center gap-y-6">
-            <div className="col-span-12 md:col-span-8">
-              <h2 className="nora-h2">Mieterservice</h2>
-              <p className="nora-prose mt-3 text-tinte-hell">
-                Schaden melden, Notfall-Hinweise und Formulare für die Mieterschaft von Nora Immobilien.
-              </p>
-            </div>
-            <div className="col-span-12 flex flex-wrap gap-4 md:col-span-4 md:justify-end">
-              <Link
-                href="/mieterservice/schadenmeldung"
-                className="nora-button-label bg-fensterladen px-6 py-3 text-weiss hover:opacity-90"
-              >
-                Schaden melden
-              </Link>
-            </div>
-          </div>
         </Container>
       </section>
 

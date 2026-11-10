@@ -58,12 +58,21 @@ async function getService(leistung: Service['serviceType']) {
   return result.docs[0] ?? null
 }
 
+async function getAblaufSchritte() {
+  const payload = await getPayloadClient()
+  const home = await payload.findGlobal({ slug: 'home' }).catch(() => null)
+  return home?.ablaufSchritte ?? null
+}
+
 export default async function LeistungPage({ params }: { params: Promise<{ leistung: string }> }) {
   const { leistung } = await params
   if (!isLeistung(leistung)) notFound()
 
   const service = await getService(leistung)
   if (!service) notFound()
+
+  const istBewirtschaftung = leistung === 'bewirtschaftung'
+  const ablaufSchritte = istBewirtschaftung ? await getAblaufSchritte() : null
 
   const Drawing = service.zeichnungsvariante ? DRAWING[service.zeichnungsvariante] : null
   const leistungsgruppe = service.leistungsgruppen?.[0]
@@ -120,6 +129,24 @@ export default async function LeistungPage({ params }: { params: Promise<{ leist
           ) : null}
         </Container>
       </section>
+
+      {ablaufSchritte && ablaufSchritte.length > 0 ? (
+        <section className="border-t border-sandstein/30 py-14 md:py-20">
+          <Container>
+            <h2 className="nora-h2">So übernehmen wir Ihre Liegenschaft</h2>
+            <ol className="nora-grid mt-8 gap-y-8">
+              {ablaufSchritte.map((schritt, i) => (
+                <li key={schritt.id} className="col-span-12 md:col-span-3">
+                  <p className="nora-nav-label text-tinte-hell">{i + 1}</p>
+                  <p className="nora-h3 mt-1">{schritt.schritt}</p>
+                  <p className="nora-prose mt-2 text-[15px] text-tinte-hell">{schritt.beschreibung}</p>
+                </li>
+              ))}
+            </ol>
+            <DraftNotice>Entwurf — noch nicht vom Kunden bestätigt.</DraftNotice>
+          </Container>
+        </section>
+      ) : null}
 
       {service.faq && service.faq.length > 0 ? (
         <section className="border-t border-sandstein/30 py-14 md:py-20">
