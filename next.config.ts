@@ -26,6 +26,19 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [{ source: '/rechtliche-hinweise', destination: '/impressum', permanent: true }]
   },
+  // Teil 2 von 3 des "dreifachen noindex" im Demo-Modus (DECISIONS.md #54) — Teil 1 ist der
+  // Meta-Tag aus den `metadata.robots`-Exporten der Root-Layouts (erzeugt keinen Header), Teil 3
+  // ist robots.ts. Dieselbe fail-safe-Logik: ohne gesetzte Variable gilt Demo-Modus.
+  async headers() {
+    const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE !== 'false'
+    if (!isDemo) return []
+    return [
+      {
+        source: '/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+    ]
+  },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],

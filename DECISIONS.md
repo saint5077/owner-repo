@@ -542,3 +542,29 @@ Ehrlich und vollständig festgehalten, nicht stillschweigend offen gelassen:
       eine zunächst vermutete Überlappung der mobilen Action-Bar mit Fliesstext erwies sich bei
       gezieltem Scroll-Screenshot als reines Artefakt von `fullPage`-Screenshots mit
       `position: fixed`-Elementen, kein echter Bug.
+67. **Echter, vorbestehender Lückenfund: Das "dreifache noindex" aus Briefing §13 war nur zu
+    einem Drittel gebaut.** Direkte Prüfung des produktiven Deploys (`curl`, da `WebFetch` für
+    neu freigegebene Hosts in dieser Session dauerhaft fehlschlug) zeigte: kein sichtbares
+    Demo-Banner, kein `<meta name="robots">`, kein `X-Robots-Tag`-Header — nur `/robots.txt`
+    (`src/app/robots.ts`) war tatsächlich implementiert. `siteSettings.demoBannerText` existierte
+    als Feld, wurde aber nirgends gerendert; keines der beiden Root-Layouts ((frontend), en) hatte
+    je ein `robots`-Metadata-Feld gesetzt. Kein Regressions-Bug aus der heutigen Arbeit, sondern
+    eine seit dem ursprünglichen Bau offene Lücke.
+    - Behoben: `robots: { index: false, follow: false }` (sonst `true`) in beiden Root-Layouts,
+      dieselbe `NEXT_PUBLIC_DEMO_MODE !== 'false'`-fail-safe-Logik wie in `robots.ts`. Zusätzlich
+      `X-Robots-Tag`-Header via `next.config.ts` `headers()` (Next erzeugt aus dem
+      Metadata-Feld nur den Meta-Tag, keinen Header — im Code selbst nachgeprüft, nicht
+      angenommen, bevor eine Kommentarzeile das Gegenteil behauptet hätte).
+    - Das sichtbare Banner wurde zunächst als eigenständige Komponente VOR `<Header>` platziert
+      und löste sofort 19 axe-core-Regionsverstösse aus (`region: Ensure all page content is
+      contained by landmarks`) — vom eigenen Testlauf korrekt gefangen. Tieferliegender Grund für
+      einen zweiten, grösseren Umbau: `Header` ist `position: fixed; top: 0`, ein Geschwister-
+      Element davor wird von einem fixen Element schlicht überdeckt, nicht nach unten verdrängt.
+      Lösung: Banner lebt jetzt als erstes Kind INNERHALB desselben `fixed`-Blocks wie die
+      Navigation (`Header.tsx`, neue `demoBannerText`-Prop statt eigener Komponente — nur noch an
+      einer Stelle gebraucht), teilt damit automatisch dessen Scroll-Ein-/Ausblenden. `role="region"`
+      mit `aria-label` für die axe-Landmark-Pflicht. `<main>`-Padding dafür von `pt-16 md:pt-20`
+      auf einheitlich `pt-32` angehoben — Höhe empirisch mit Playwright an allen Breakpoints
+      gemessen (116,6 px mobil bei zweizeilig umbrechendem Banner, 112,8 px ab `md`), nicht
+      geschätzt; eine einzelne grosszügige Konstante statt zweier knapp bemessener Werte, da
+      Letzteres bei 1440 px nur 0,8 px Reserve gehabt hätte.

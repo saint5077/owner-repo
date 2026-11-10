@@ -36,9 +36,19 @@ const NAV_EN = [
   { label: 'Contact', href: '/kontakt' },
 ]
 
-type HeaderProps = { telefon?: string; locale?: 'de' | 'en' }
+type HeaderProps = { telefon?: string; locale?: 'de' | 'en'; demoBannerText?: string }
 
-export function Header({ telefon, locale = 'de' }: HeaderProps) {
+const DEMO_BANNER_FALLBACK_DE = 'Konzept-Vorschau von Axion – nicht die offizielle Website der Nora Immobilien AG.'
+const DEMO_BANNER_TEXT_EN = 'Concept preview by Axion – not the official website of Nora Immobilien AG.'
+
+export function Header({ telefon, locale = 'de', demoBannerText }: HeaderProps) {
+  // Teil 1 von 3 des "dreifachen noindex" im Demo-Modus (DECISIONS.md #54, sichtbarer Teil) —
+  // dieselbe fail-safe-Logik wie next.config.ts/robots.ts: ohne gesetzte Variable gilt Demo-Modus.
+  // Lebt im selben `fixed`-Block wie die Navigation (nicht als Geschwister-Element davor), weil
+  // ein Element vor einem `position: fixed`-Header dessen `top-0` nicht nach unten verschiebt —
+  // der Header würde die Banner-Zeile sonst einfach überdecken.
+  const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE !== 'false'
+  const bannerText = locale === 'en' ? DEMO_BANNER_TEXT_EN : (demoBannerText ?? DEMO_BANNER_FALLBACK_DE)
   const LEISTUNGEN = locale === 'en' ? LEISTUNGEN_EN : LEISTUNGEN_DE
   const NAV = locale === 'en' ? NAV_EN : NAV_DE
   const leistungenLabel = locale === 'en' ? 'Services' : 'Leistungen'
@@ -83,6 +93,15 @@ export function Header({ telefon, locale = 'de' }: HeaderProps) {
       className="fixed inset-x-0 top-0 z-50 border-b border-sandstein/30 bg-kalk/95 backdrop-blur transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]"
       style={{ transform: visible ? 'translateY(0)' : 'translateY(-100%)' }}
     >
+      {isDemo ? (
+        <div
+          role="region"
+          aria-label={locale === 'en' ? 'Preview notice' : 'Vorschau-Hinweis'}
+          className="bg-tinte px-4 py-1.5 text-center text-[12px] text-weiss"
+        >
+          <p>{bannerText}</p>
+        </div>
+      ) : null}
       <Container className="flex h-16 items-center justify-between gap-6 md:h-20">
         <Link
           href={locale === 'en' ? '/en' : '/'}

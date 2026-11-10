@@ -12,6 +12,10 @@ import { getSiteUrl } from '@/lib/seo'
 import { archivo, literata } from './fonts'
 import './styles.css'
 
+// Teil 1 von 3 des "dreifachen noindex" im Demo-Modus (DECISIONS.md #54) — dieses Feld erzeugt
+// nur den Meta-Tag. Teil 2 (X-Robots-Tag-Header) steht in next.config.ts, Teil 3 in robots.ts.
+const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE !== 'false'
+
 export const metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
@@ -23,20 +27,22 @@ export const metadata = {
   manifest: '/manifest.json',
   alternates: { canonical: '/', languages: { 'de-CH': '/', en: '/en' } },
   openGraph: { locale: 'de_CH', siteName: 'Nora Immobilien AG' },
+  robots: isDemo ? { index: false, follow: false } : { index: true, follow: true },
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const payload = await getPayloadClient()
   const siteSettings = await payload.findGlobal({ slug: 'siteSettings' }).catch(() => null)
   const telefon = siteSettings?.firma?.telefon ?? undefined
+  const demoBannerText = siteSettings?.demoBannerText ?? undefined
 
   return (
     <html lang="de-CH" className={`${archivo.variable} ${literata.variable}`}>
       <body>
         <JsonLd data={buildRealEstateAgentJsonLd(siteSettings)} />
         <SkipLink />
-        <Header telefon={telefon} />
-        <main id="hauptinhalt" className="pt-16 md:pt-20">
+        <Header telefon={telefon} demoBannerText={demoBannerText} />
+        <main id="hauptinhalt" className="pt-32">
           {children}
         </main>
         <Footer siteSettings={siteSettings} />

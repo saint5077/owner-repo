@@ -11,10 +11,14 @@ import { getPayloadClient } from '@/lib/payload'
 import { archivo, literata } from '../(frontend)/fonts'
 import '../(frontend)/styles.css'
 
+// Siehe (frontend)/layout.tsx — dieselbe fail-safe-Logik, eigenes Root-Layout (DECISIONS.md #5x).
+const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE !== 'false'
+
 export const metadata = {
   title: { default: 'Nora Immobilien AG', template: '%s — Nora Immobilien AG' },
   description:
     'Property management, condominium management, first letting and sales in Zurich — since 1979. A small, independent, privately owned team.',
+  robots: isDemo ? { index: false, follow: false } : { index: true, follow: true },
 }
 
 /**
@@ -32,7 +36,7 @@ export default async function EnglishLayout({ children }: { children: ReactNode 
       <body>
         <SkipLink locale="en" />
         <Header telefon={telefon} locale="en" />
-        <main id="hauptinhalt" className="pt-16 md:pt-20">
+        <main id="hauptinhalt" className="pt-32">
           <Container>
             <div className="pt-6">
               <DraftBox title="English — translation in progress">
