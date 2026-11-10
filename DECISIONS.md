@@ -501,3 +501,44 @@ Ehrlich und vollständig festgehalten, nicht stillschweigend offen gelassen:
   Bautreuhand, SVIT-Bezeichnung, Google-Bewertungen, Notfallnummern, Formulare als PDF,
   Ansprechperson pro Leistung usw.) bleiben unverändert in `CONTENT_TODO.md` offen — Phase 8
   hat keine davon neu aufgeworfen oder gelöst, da ausserhalb des QS-Umfangs.
+65. **Echter Bug gefunden und behoben: `scripts/seed-en.ts` löschte deutsche Inhalte.** Beim
+    Nacharbeiten der Startseite fiel auf, dass der Wegweiser-Block ("Wie können wir Ihnen
+    helfen?") auf Deutsch leer gerendert wurde. Ursache: `seed-en.ts` schrieb Array-Felder
+    (`home.wegweiser`, `home.ablaufSchritte`, `services.leistungsgruppen[].punkte`) ohne die
+    bestehenden Zeilen-`id`s mitzugeben. Payload interpretiert das als "Zeilen ersetzen" statt
+    "Text in dieser Sprache ergänzen" und legt beim `locale: 'en'`-Update komplett neue
+    Array-Zeilen an — die alten Zeilen samt ihren deutschen `_locales`-Einträgen werden dabei
+    kaskadierend gelöscht, nicht nur überschrieben. Betroffen waren 3 Wegweiser-Links, 4
+    Ablauf-Schritte und die 8-teilige "Was wir übernehmen"-Liste der Bewirtschaftung — auf
+    Deutsch komplett leer bzw. (dank `localization.fallback: true`) still auf Englisch
+    zurückfallend, unbemerkt seit Phase 7. Behoben in `seed-en.ts`: holt jetzt zuerst die
+    bestehenden Zeilen samt echter `id`, schreibt die englische Übersetzung unter Beibehaltung
+    dieser `id`s zurück (inkl. der äusseren `leistungsgruppen`-Zeile, nicht nur der inneren
+    `punkte`). Lokal verifiziert (`pnpm seed` → `pnpm seed:en` → beide Sprachen koexistieren in
+    der DB). Die bereits auf Neon vorhandene, identische Datenlücke wurde direkt per
+    `INSERT` der fehlenden `de`-Zeilen (gleiche Zeilen-IDs, keine bestehenden Daten verändert
+    oder gelöscht) nachgetragen, nicht über einen erneuten Seed-Lauf — ein Node-Prozess aus
+    dieser Sandbox kann Neons Postgres-Port nicht direkt erreichen (nur HTTPS ist erlaubt),
+    der MCP-Tool-Pfad schon.
+66. **Startseite von 9 auf 7 Abschnitte verschlankt (nach echtem Audit, nicht angenommen).**
+    Vor jeder Änderung wurde `page.tsx` tatsächlich gelesen, nicht von aussen vermutet, ob die
+    Seite "zu voll" ist. Ergebnis: Zwei Abschnitte waren echte Streichkandidaten, der Rest
+    (Hero, Wegweiser, Warum-Nora-Leiste, Leistungen, Aktuelle Objekte, Team, Kontakt) bleibt
+    unverändert, weil jeder davon eine eigene, nicht redundante Aufgabe erfüllt.
+    - **"So übernehmen wir Ihre Liegenschaft" (Ablauf-Schritte) verschoben** auf `/bewirtschaftung`
+      (zwischen "Was wir übernehmen" und FAQ) — die Entwurfsmarkierung ("Entwurf — noch nicht
+      vom Kunden bestätigt.") wandert unverändert mit. Inhaltlich gehört der Ablauf zu Leuten,
+      die bereits bei der Bewirtschaftungsseite sind, nicht auf die Startseite; dort stand er
+      ausserdem bislang als unbestätigter Entwurf im ersten Scroll der wichtigsten Seite.
+    - **Eigener "Mieterservice"-CTA-Block von der Startseite entfernt** — ersatzlos, weil
+      `/mieterservice` bereits dreifach erreichbar ist: als einer der drei Wegweiser-Links
+      ("Ich wohne in einer Liegenschaft von Nora"), im Header und im Footer sowie im mobilen
+      Action-Bar. Der Block duplizierte eine bereits vorhandene Route ohne eigenen Mehrwert.
+    - Geprüft und bewusst NICHT entfernt: Wegweiser (einzige Stelle, die alle sechs Zielgruppen
+      aus dem Briefing direkt anspricht), Warum-Nora-Leiste (deckt sich inhaltlich bereits mit
+      dem empfohlenen "Warum wir"-Abschnitt, keine Änderung nötig), Leistungen/Objekte/Team
+      (jeweils eigene, nicht redundante Konversionsfunktion).
+    - Screenshots bei 390/768/1440px auf `/` und `/bewirtschaftung` nach der Änderung geprüft;
+      eine zunächst vermutete Überlappung der mobilen Action-Bar mit Fliesstext erwies sich bei
+      gezieltem Scroll-Screenshot als reines Artefakt von `fullPage`-Screenshots mit
+      `position: fixed`-Elementen, kein echter Bug.
