@@ -77,21 +77,6 @@ export default async function EnglishHomePage() {
 
       <section className="border-t border-sandstein/30 py-14 md:py-20">
         <Container>
-          <h2 className="nora-h2">How can we help you?</h2>
-          <ul className="nora-grid mt-8 gap-y-6">
-            {(home?.wegweiser ?? []).map((item) => (
-              <li key={item.id} className="col-span-12 md:col-span-4">
-                <Link href={item.linkZiel ?? '/en'} className="nora-h3 block hover:text-fensterladen">
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Container>
-      </section>
-
-      <section className="border-t border-sandstein/30 py-14 md:py-20">
-        <Container>
           <ul className="nora-grid gap-y-10">
             <li className="col-span-12 sm:col-span-6 lg:col-span-3">
               <p className="nora-h3">{jahre} years</p>

@@ -568,3 +568,14 @@ Ehrlich und vollständig festgehalten, nicht stillschweigend offen gelassen:
       gemessen (116,6 px mobil bei zweizeilig umbrechendem Banner, 112,8 px ab `md`), nicht
       geschätzt; eine einzelne grosszügige Konstante statt zweier knapp bemessener Werte, da
       Letzteres bei 1440 px nur 0,8 px Reserve gehabt hätte.
+68. **Wegweiser-Abschnitt ("Wie können wir Ihnen helfen?") von Start (DE+EN) entfernt, auf
+    zweiten Blick des Kunden hin — und mit besserer Begründung als beim ersten Behalten-Entscheid
+    in #66.** Von den drei Links duplizieren zwei direkt die beiden Hero-CTAs eine Sektion
+    darüber (Eigentümer-Link = "Verwaltung anfragen", Wohnungssuche-Link = "Freie Objekte
+    ansehen", je selbes Ziel), der dritte (Mieterservice) ist bereits in Header, Footer und
+    mobiler Action-Bar erreichbar. Die #66-Begründung "einzige Stelle für alle sechs
+    Zielgruppen" war selbst schon ungenau — der Abschnitt deckte nie mehr als drei ab, nie
+    Verkauf/Stockwerkeigentum/Erstvermietung — und übersah, wie viel davon der Hero bereits
+    übernimmt. Startseite damit bei 6 Abschnitten (von ursprünglich 9). `home.wegweiser`
+    (CMS-Feld, Seed-Daten) bewusst nicht mitentfernt — reine Aufräumarbeit am Schema ohne
+    Platzierungsentscheidung wäre eigener Schritt, nicht Teil dieser Änderung.
