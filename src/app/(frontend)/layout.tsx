@@ -34,15 +34,14 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const payload = await getPayloadClient()
   const siteSettings = await payload.findGlobal({ slug: 'siteSettings' }).catch(() => null)
   const telefon = siteSettings?.firma?.telefon ?? undefined
-  const demoBannerText = siteSettings?.demoBannerText ?? undefined
 
   return (
     <html lang="de-CH" className={`${archivo.variable} ${literata.variable}`}>
       <body>
         <JsonLd data={buildRealEstateAgentJsonLd(siteSettings)} />
         <SkipLink />
-        <Header telefon={telefon} demoBannerText={demoBannerText} />
-        <main id="hauptinhalt" className="pt-32">
+        <Header telefon={telefon} />
+        <main id="hauptinhalt" className="pt-16 md:pt-20">
           {children}
         </main>
         <Footer siteSettings={siteSettings} />

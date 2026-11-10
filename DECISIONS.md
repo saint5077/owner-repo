@@ -579,3 +579,9 @@ Ehrlich und vollständig festgehalten, nicht stillschweigend offen gelassen:
     übernimmt. Startseite damit bei 6 Abschnitten (von ursprünglich 9). `home.wegweiser`
     (CMS-Feld, Seed-Daten) bewusst nicht mitentfernt — reine Aufräumarbeit am Schema ohne
     Platzierungsentscheidung wäre eigener Schritt, nicht Teil dieser Änderung.
+69. **Sichtbares Demo-Banner aus #67 auf Kundenwunsch wieder entfernt — die unsichtbaren zwei
+    Drittel bleiben.** `robots`-Metadata (Meta-Tag), `X-Robots-Tag`-Header (next.config.ts) und
+    `/robots.txt` bleiben unverändert aktiv; nur die sichtbare Banner-Zeile in `Header.tsx` samt
+    der dafür erhöhten `<main>`-Polsterung (`pt-32` → zurück auf `pt-16 md:pt-20`) wurde entfernt.
+    Suchmaschinen-Schutz im Demo-Modus bleibt damit vollständig bestehen, nur ohne sichtbaren
+    menschlichen Hinweis darauf.

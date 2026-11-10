@@ -36,7 +36,7 @@ export default async function EnglishLayout({ children }: { children: ReactNode 
       <body>
         <SkipLink locale="en" />
         <Header telefon={telefon} locale="en" />
-        <main id="hauptinhalt" className="pt-32">
+        <main id="hauptinhalt" className="pt-16 md:pt-20">
           <Container>
             <div className="pt-6">
               <DraftBox title="English — translation in progress">
